@@ -1,0 +1,222 @@
+package com.dwms.activity.service.impl;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
+import org.apache.commons.collections.ListUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import tk.mybatis.mapper.entity.Example;
+import tk.mybatis.mapper.entity.Example.Criteria;
+
+import com.dwms.activity.dao.ActUserMapper;
+import com.dwms.activity.dao.ActivityMapper;
+import com.dwms.activity.domain.ActUser;
+import com.dwms.activity.domain.Activity;
+import com.dwms.activity.domain.vo.ActivityWithUser;
+import com.dwms.activity.service.ActivityService;
+import com.dwms.common.config.HtmlConfig;
+import com.dwms.common.domain.ResponseBo;
+import com.dwms.common.service.impl.BaseService;
+import com.dwms.common.util.DateUtil;
+import com.dwms.common.util.FileUtils;
+import com.dwms.course.domain.Course;
+import com.dwms.examine.domain.Exam;
+import com.dwms.meeting.domain.MtgSummary;
+import com.dwms.meeting.domain.vo.MtgSumWithUser;
+import com.google.common.collect.Lists;
+
+@Service("activityService")
+@Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
+public class ActivityServiceImpl extends BaseService<Activity> implements ActivityService {
+
+    private Logger log = LoggerFactory.getLogger(this.getClass());
+
+    @Autowired
+    private HtmlConfig htmlConfig;
+    @Autowired
+    private ActivityMapper activityMapper;
+    
+    @Autowired
+    private ActUserMapper actUserMapper;
+    
+    @Override
+    public List<Activity> findAllActivitys(Activity activity) {
+    	try {
+			Example example = new Example(Activity.class);
+			Criteria criteria = example.createCriteria();
+			criteria.andCondition("status != ", Activity.STATUS_DELETE);//不显示状态为删除的
+			if (null != activity.getPartyId()) {
+				criteria.andCondition("partyId = ", activity.getPartyId());
+			}
+			if (StringUtils.isNotBlank(activity.getActName())) {
+				criteria.andCondition("actName like ", "%" + activity.getActName() + "%");
+			}
+			if (null != activity.getStatus()) {
+				criteria.andCondition("status = ", activity.getStatus());
+			}
+			if (StringUtils.isNotBlank(activity.getTimeField())) {
+                String[] timeArr = activity.getTimeField().split("~");
+                criteria.andCondition("date_format(createTime,'%Y-%m-%d') >=", timeArr[0]);
+                criteria.andCondition("date_format(createTime,'%Y-%m-%d') <=", timeArr[1]);
+            }
+			example.setOrderByClause("status desc, createTime desc");
+			return this.selectByExample(example);
+		} catch (Exception e) {
+			log.error("获取活动列表失败", e);
+			return new ArrayList<>();
+		}
+    }
+
+    @Override
+    @Transactional
+    public ResponseBo addActivity(Activity activity, String[] users) {
+        ResponseBo r = checkAct(activity);
+        if (!r.success()) return r;
+        //activity.setStatus(Activity.STATUS_WAIT);
+        this.activityMapper.insertSelective(activity);
+        // 保存编辑器内容
+        saveContent(activity);
+        //插入参与用户
+        addActUser(activity, Arrays.asList(users));
+        return ResponseBo.ok("新增活动成功！");
+    }
+    
+
+    private ResponseBo checkAct(Activity act) {
+        if (act.getApplyEndTime().getTime() < new Date().getTime() ) {
+            return ResponseBo.error("活动名截止时间必须大于当前时间");
+        }
+        if (act.getBeginTime().getTime() < act.getApplyEndTime().getTime() ) {
+            return ResponseBo.error("活动开始时间必须大于报名截止时间");
+        }
+        if (act.getEndTime().getTime() < act.getBeginTime().getTime() ) {
+            return ResponseBo.error("活动结束时间必须大于活动开始时间");
+        }
+        return ResponseBo.ok();
+    }
+
+    private void addActUser(Activity activity, List<String> users) {
+    	for(String userId :users) {
+    		ActUser actUser = new ActUser();
+    		actUser.setActId(activity.getActId());
+    		actUser.setUserId(userId);
+    		this.actUserMapper.insertSelective(actUser);
+    	}
+	}
+
+	@Override
+    @Transactional
+    public ResponseBo updateActivity(Activity activity, String[] users) {
+	    boolean noEdit = (null == activity.getStatus());//发布后修改为null
+	    if (!noEdit) {
+	        ResponseBo r = checkAct(activity);
+	        if (!r.success()) return r;
+	    }
+	    activity.setUpdateTime(new Date());
+        this.updateNotNull(activity);
+        // 保存编辑器内容
+        saveContent(activity);
+        if (!noEdit) {
+            //插入新的，删除提出的用户
+            updateMsgUser(activity, users);
+        }
+        return ResponseBo.ok("修改活动成功！");
+    }
+
+	private void saveContent(Activity act) {
+        String root = htmlConfig.getUploadPath();
+        String path= htmlConfig.getRoot() + htmlConfig.getActivity() + "/" + act.getActId() + "/";
+        //删除旧文件（清空dir）
+        FileUtils.clearDir(root + path);
+        String fileName = System.currentTimeMillis() + HtmlConfig.HTML;
+        FileUtils.saveByString(root + path, act.getContent(), fileName);
+        //保存文件路径
+        act.setFilePath(path + fileName);
+        this.updateNotNull(act);
+    }
+	
+	private void updateMsgUser(Activity activity, String[] users) {
+		Example example = new Example(ActUser.class);
+		example.createCriteria().andCondition("actId=", activity.getActId());
+		List<ActUser> auList = this.actUserMapper.selectByExample(example);
+		
+		List<String> auUserList = Lists.newArrayList();
+		for (ActUser mu : auList) {
+			auUserList.add(mu.getUserId());
+		}
+		List<String> userList = Arrays.asList(users);
+		// subtract(a,b) 截取a有的b没有的
+		List<String> delUsers = ListUtils.subtract(auUserList, userList);
+		List<String> addUsers = ListUtils.subtract(userList, auUserList);
+		//delete
+		if (!delUsers.isEmpty()) {
+			example = new Example(ActUser.class);
+			example.createCriteria().andCondition("actId=", activity.getActId()).andIn("userId", delUsers);
+			this.actUserMapper.deleteByExample(example);
+		}
+		//insert
+		addActUser(activity, addUsers);
+	}
+
+	@Override
+	@Transactional
+	public ResponseBo deleteActivitys(String ids) {
+	    List<String> list = Arrays.asList(ids.split(","));
+        List<Activity> delList = Lists.newArrayList();
+        for (String id : list) {
+            Activity act = selectByKey(NumberUtils.toInt(id));
+            int status = act.getStatus();
+            boolean delete = false;
+            if (status == Exam.STATUS_VALID) {
+                if(DateUtil.compareDate(new Date(), act.getEndTime()) > 0) {//已结束
+                    delete = true;
+                }
+            } else if (status == Exam.STATUS_CANCEL
+                    ||status == Exam.STATUS_WAIT) {
+                delete = true;
+            }
+            if (delete) {
+                act.setStatus(Exam.STATUS_DELETE);
+                delList.add(act);
+            } else {
+                return ResponseBo.error("删除活动失败，所选的活动只能是已取消、待发布或已过期的！"); 
+            }
+        }
+        for(Activity act : delList) {
+            this.updateNotNull(act);
+        }
+        return ResponseBo.ok("删除考试成功！");
+	}
+
+	@Override
+	public ActivityWithUser findById(Integer actId) {
+		List<ActivityWithUser> list = this.activityMapper.findById(actId);
+		if (list.isEmpty()) return null;
+		List<String> users = Lists.newArrayList();
+		for (ActivityWithUser act : list) {
+			users.add(act.getUserId());
+		}
+		ActivityWithUser vo = list.get(0);
+		vo.setUserIds(users);
+		
+		//编辑器内容
+        getContent(vo);
+		
+		return vo;
+	}
+	
+	private void getContent(ActivityWithUser sum) {
+        String fileName = htmlConfig.getUploadPath() + sum.getFilePath();
+        sum.setContent(FileUtils.getFile(fileName));
+    }
+}

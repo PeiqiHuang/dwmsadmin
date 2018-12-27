@@ -1,0 +1,16 @@
+package com.dwms.system.dao;
+
+import java.util.List;
+
+import com.dwms.common.config.MyMapper;
+import com.dwms.system.domain.SysUser;
+import com.dwms.system.domain.SysUserWithRole;
+
+public interface SysUserMapper extends MyMapper<SysUser> {
+
+	List<SysUser> findSysUserWithParty(SysUser SysUser);
+	
+	List<SysUserWithRole> findSysUserWithRole(String SysUserId);
+	
+	SysUser findSysUserProfile(SysUser SysUser);
+}

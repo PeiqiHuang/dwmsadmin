@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dwms.help.dao.HelpMapper">
+  <resultMap id="BaseResultMap" type="com.dwms.help.domain.Help">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="infoId" jdbcType="INTEGER" property="infoId" />
+    <result column="infoType" jdbcType="INTEGER" property="infoType" />
+    <result column="title" jdbcType="VARCHAR" property="title" />
+    <result column="text" jdbcType="VARCHAR" property="text" />
+    <result column="infoStatus" jdbcType="TINYINT" property="infoStatus" />
+    <result column="createTime" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+  
+  <select id="findAllHelps" resultType="help">
+    select h.*, ht.typeName from tb_help_info h 
+    left join tb_help_type ht on h.infoType=ht.typeId
+    where 1=1
+    <if test="infoStatus != null">
+        AND h.infoStatus = #{infoStatus}
+    </if>
+    <if test="infoType != null">
+        AND h.infoType = #{infoType}
+    </if>
+    <if test="title != null and title != ''">
+        AND h.title like concat('%',#{title},'%') 
+    </if>
+    <if test="timeField != null and timeField != ''">
+        AND date_format(h.createTime,'%Y-%m-%d') &gt;= #{beginField}
+        AND date_format(h.createTime,'%Y-%m-%d') &lt;= #{endField}
+    </if>
+    order by h.infoStatus desc, h.createTime desc
+  </select>  
+</mapper>

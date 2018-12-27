@@ -1,0 +1,266 @@
+package com.dwms.examine.service.impl;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
+import org.apache.commons.collections.ListUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import tk.mybatis.mapper.entity.Example;
+import tk.mybatis.mapper.entity.Example.Criteria;
+
+import com.dwms.common.domain.ResponseBo;
+import com.dwms.common.service.impl.BaseService;
+import com.dwms.common.util.DateUtil;
+import com.dwms.course.domain.Course;
+import com.dwms.examine.dao.ExamMapper;
+import com.dwms.examine.dao.ExamQuMapper;
+import com.dwms.examine.dao.ExamUserMapper;
+import com.dwms.examine.domain.Exam;
+import com.dwms.examine.domain.ExamQu;
+import com.dwms.examine.domain.ExamUser;
+import com.dwms.examine.domain.vo.ExamWithUser;
+import com.dwms.examine.service.ExamQuService;
+import com.dwms.examine.service.ExamService;
+import com.dwms.examine.service.ExamUserService;
+import com.google.common.collect.Lists;
+
+@Service("examService")
+@Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
+public class ExamServiceImpl extends BaseService<Exam> implements ExamService {
+
+    private Logger log = LoggerFactory.getLogger(this.getClass());
+
+    @Autowired
+    private ExamMapper examMapper;
+    
+    @Autowired
+    private ExamUserMapper examUserMapper;
+    
+    @Autowired
+    private ExamQuMapper examQuMapper;
+    
+    @Autowired
+    private ExamQuService examQuService;
+    
+    @Autowired
+    private ExamUserService examUserService;
+
+    @Override
+    public List<Exam> findAllExams(Exam exam) {
+    	try {
+			Example example = new Example(Exam.class);
+			Criteria criteria = example.createCriteria();
+			criteria.andCondition("status != ", Exam.STATUS_DELETE);//不显示状态为删除的
+			if (null != exam.getPartyId()) {
+				criteria.andCondition("partyId = ", exam.getPartyId());
+			}
+			if (StringUtils.isNotBlank(exam.getExamName())) {
+				criteria.andCondition("examName like ", "%" + exam.getExamName() + "%");
+			}
+			if (null != exam.getStatus()) {
+				criteria.andCondition("status = ", exam.getStatus());
+			}
+			if (StringUtils.isNotBlank(exam.getTimeField())) {
+                String[] timeArr = exam.getTimeField().split("~");
+                criteria.andCondition("date_format(createTime,'%Y-%m-%d') >=", timeArr[0]);
+                criteria.andCondition("date_format(createTime,'%Y-%m-%d') <=", timeArr[1]);
+            }
+			example.setOrderByClause("status desc, createTime desc");
+			return this.selectByExample(example);
+		} catch (Exception e) {
+			log.error("获取考试列表失败", e);
+			return new ArrayList<>();
+		}
+    }
+
+    @Override
+    @Transactional
+    public void addExam(Exam exam, String[] users) {
+        exam.setStatus(Exam.STATUS_WAIT);
+        this.examMapper.insertSelective(exam);
+        //插入参与用户
+        addExamUser(exam, Arrays.asList(users));
+    }
+    
+    @Override
+    @Transactional
+    public void copyExam(Exam exam, String[] users) {
+        Integer copyId = exam.getExamId();
+        List<ExamQu> eqs = this.examQuService.findExamQusByExamId(copyId);
+        
+        exam.setExamId(null);
+        exam.setQuNum(eqs.size());//试题数
+        this.addExam(exam, users);//add之后会更新id
+        //复制试题
+        for (ExamQu eq : eqs) {
+            eq.setEqId(null);
+            eq.setExamId(exam.getExamId());
+            eq.setCreateTime(exam.getCreateTime());
+            this.examQuMapper.insertSelective(eq);
+        }
+    }
+
+    private void addExamUser(Exam exam, List<String> users) {
+        addExamUser(exam, users, ExamUser.TYPE_FIRST);
+    }
+    private void addExamUser(Exam exam, List<String> users, int examType) {
+    	for(String userId :users) {
+    		ExamUser examUser = new ExamUser();
+    		examUser.setExamId(exam.getExamId());
+    		examUser.setUserId(userId);
+    		examUser.setExamType(examType);
+    		this.examUserMapper.insertSelective(examUser);
+    	}
+	}
+
+	@Override
+    @Transactional
+    public ResponseBo updateExam(Exam exam, String[] users) {
+	    boolean noEdit = (null == exam.getStatus());//发布后修改为null
+	    if (!noEdit && exam.getStatus() == Exam.STATUS_VALID) {
+	        ResponseBo rb = checkExam(exam);
+    	    if (!rb.success()) {
+    	        return rb;
+    	    }
+	    }
+	    if (!noEdit && exam.getStatus() == Exam.STATUS_VALID) {
+	        exam.setReleaseTime(new Date());
+        }
+        this.updateNotNull(exam);
+        if (!noEdit) {
+            //插入新的，删除提出的用户
+            updateMsgUser(exam, users);
+        }
+        return ResponseBo.ok("修改考试成功！");
+    }
+
+	private void updateMsgUser(Exam exam, String[] users) {
+		Example example = new Example(ExamUser.class);
+		example.createCriteria().andCondition("examId=", exam.getExamId());
+		List<ExamUser> euList = this.examUserMapper.selectByExample(example);
+		
+		List<String> muUserList = Lists.newArrayList();
+		for (ExamUser mu : euList) {
+			muUserList.add(mu.getUserId());
+		}
+		List<String> userList = Arrays.asList(users);
+		// subtract(a,b) 截取a有的b没有的
+		List<String> delUsers = ListUtils.subtract(muUserList, userList);
+		List<String> addUsers = ListUtils.subtract(userList, muUserList);
+		//delete
+		if (!delUsers.isEmpty()) {
+			example = new Example(ExamUser.class);
+			example.createCriteria().andCondition("examId=", exam.getExamId()).andIn("userId", delUsers);
+			this.examUserMapper.deleteByExample(example);
+		}
+		//insert
+		addExamUser(exam, addUsers);
+	}
+
+	@Override
+	@Transactional
+	public ResponseBo deleteExams(String ids) {
+		List<String> list = Arrays.asList(ids.split(","));
+		List<Exam> mtgList = Lists.newArrayList();
+		for (String id : list) {
+			Exam exam = selectByKey(NumberUtils.toInt(id));
+			int status = exam.getStatus();
+			boolean delete = false;
+			if (status == Exam.STATUS_VALID) {
+				if(DateUtil.compareDate(new Date(), exam.getEndTime()) > 0) {//已结束
+					delete = true;
+				}
+			} else if (status == Exam.STATUS_CANCEL
+					||status == Exam.STATUS_WAIT) {
+				delete = true;
+			}
+			if (delete) {
+				exam.setStatus(Exam.STATUS_DELETE);
+				mtgList.add(exam);
+			} else {
+				return ResponseBo.error("删除考试失败，所选的考试只能是已取消、待发布或已过期的！"); 
+			}
+		}
+		for(Exam mtg : mtgList) {
+			this.updateNotNull(mtg);
+		}
+		return ResponseBo.ok("删除考试成功！");
+	}
+
+	@Override
+	public ExamWithUser findById(Integer examId) {
+		List<ExamWithUser> list = this.examMapper.findById(examId);
+		if (list.isEmpty()) return null;
+		List<String> users = Lists.newArrayList();
+		for (ExamWithUser mtg : list) {
+			users.add(mtg.getUserId());
+		}
+		ExamWithUser vo = list.get(0);
+		vo.setUserIds(users);
+		
+		// progress set
+		Date now = new Date();
+		int progress = Exam.PROGRESS_NOT_BEGIN;
+		if (DateUtil.compareDate(vo.getBeginTime(), now) <= 0) {
+			progress = Exam.PROGRESS_BEGIN;
+		}
+		if (DateUtil.compareDate(vo.getEndTime(), now) <= 0) {
+			progress = Exam.PROGRESS_END;
+		}
+		vo.setProgress(progress);
+		
+		return vo;
+	}
+	
+	private ResponseBo checkExam(Exam exam) {
+	    List<ExamQu> eqs = examQuService.findExamQusByExamId(exam.getExamId());
+	    if (eqs.isEmpty())
+	        return ResponseBo.error("试卷未添加试题！");
+        int sum = 0;
+        for (ExamQu eq : eqs) {
+            sum += eq.getScore();
+        }
+        int totalScore = exam.getTotalScore();
+        if (sum != totalScore) {
+            return ResponseBo.error(String.format("所有试题分数相加%s分，试卷总分%s分，请检查！", sum, totalScore));
+        }
+        
+        return ResponseBo.ok();
+	}
+
+    @Override
+    public ResponseBo makeup(Integer examId) {
+        ExamWithUser exam = this.findById(examId);
+        if (exam.getProgress() != Exam.PROGRESS_END) {
+            return ResponseBo.error("考试未结束，不能发起补考！");
+        }
+        ExamUser examUser = new ExamUser();
+        examUser.setExamId(examId);
+        List<ExamUser> eus = examUserService.findAllByExamId(examUser);
+        boolean hasBad = false;
+        List<String> targets = Lists.newArrayList();
+        for (ExamUser eu : eus) {
+            if (eu.getStatus() == ExamUser.STATUS_FAIL
+                    || eu.getStatus() == ExamUser.STATUS_NOT_SUBMIT) {
+                hasBad = true;
+                targets.add(eu.getUserId());
+            }
+        }
+        if (!hasBad) {
+            return ResponseBo.error("没有未提交或未通过的考试人员，不能发起补考！");
+        }
+        
+        addExamUser(exam, targets, ExamUser.TYPE_MAKEUP);
+        return ResponseBo.ok("发起补考成功！");
+    }
+}

@@ -1,0 +1,61 @@
+package com.dwms.common.config;
+
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.convert.support.GenericConversionService;
+import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
+
+import com.dwms.common.util.StringToDateConverter;
+import com.dwms.common.xss.XssFilter;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+@Configuration
+@SuppressWarnings("unchecked")
+public class WebConfig {
+
+	@Autowired
+    private RequestMappingHandlerAdapter handlerAdapter;
+
+    @PostConstruct //spring容器初始化的时候执行该方法
+    public void initEditableValidation(){
+        ConfigurableWebBindingInitializer initializer=(ConfigurableWebBindingInitializer) handlerAdapter.getWebBindingInitializer();
+        if (initializer.getConversionService()!=null){
+            GenericConversionService genericConversionService=(GenericConversionService) initializer.getConversionService();
+            genericConversionService.addConverter(new StringToDateConverter());
+        }
+    }
+    
+    /**
+     * XssFilter Bean
+     */
+    @Bean
+    public FilterRegistrationBean xssFilterRegistrationBean() {
+        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
+        filterRegistrationBean.setFilter(new XssFilter());
+        filterRegistrationBean.setOrder(1);
+        filterRegistrationBean.setEnabled(true);
+        filterRegistrationBean.addUrlPatterns("/*");
+        Map<String, String> initParameters = new HashMap<>();
+        initParameters.put("excludes", "/favicon.ico,/img/*,/js/*,/css/*");
+        initParameters.put("isIncludeRichText", "true");
+        filterRegistrationBean.setInitParameters(initParameters);
+        return filterRegistrationBean;
+    }
+
+    @Bean
+    public ObjectMapper getObjectMapper(DwmsProperties dwmsProperties) {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setDateFormat(new SimpleDateFormat(dwmsProperties.getTimeFormat()));
+        return mapper;
+    }
+
+}

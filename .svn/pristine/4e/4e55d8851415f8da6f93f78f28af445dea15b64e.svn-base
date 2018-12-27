@@ -1,0 +1,162 @@
+package com.dwms.album.service.impl;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import tk.mybatis.mapper.entity.Example;
+import tk.mybatis.mapper.entity.Example.Criteria;
+
+import com.dwms.album.dao.AlbumImgMapper;
+import com.dwms.album.dao.AlbumMapper;
+import com.dwms.album.domain.AlbumImg;
+import com.dwms.album.domain.AlbumImgForm;
+import com.dwms.album.service.AlbumImgService;
+import com.dwms.common.config.ImageConfig;
+import com.dwms.common.domain.ResponseBo;
+import com.dwms.common.service.impl.BaseService;
+import com.dwms.common.util.FileUtils;
+import com.dwms.common.util.PathUtils;
+import com.google.common.collect.Lists;
+
+@Service("albumImgService")
+@Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
+public class AlbumImgServiceImpl extends BaseService<AlbumImg> implements AlbumImgService {
+
+    private Logger log = LoggerFactory.getLogger(this.getClass());
+
+    @Autowired
+    private ImageConfig imageConfig;
+    
+    @Autowired
+    private AlbumMapper albumMapper;
+    
+    @Autowired
+    private AlbumImgMapper albumImgMapper;
+    
+    @Override
+    public List<AlbumImg> findImgs(AlbumImg ai) {
+        List<AlbumImg> list = findImgs(ai.getAlbumId());
+        PathUtils.setImgAccessPath(list, "imgPath");
+        return list;
+    }
+    
+    private List<AlbumImg> findImgs(Integer albumId) {
+        try {
+            Example example = new Example(AlbumImg.class);
+            Criteria criteria = example.createCriteria();
+            criteria.andEqualTo("albumId", albumId);
+            example.setOrderByClause("aiNo asc, createTime desc");
+            return this.selectByExample(example);
+        } catch (Exception e) {
+            log.error("获取图片列表失败", e);
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public ResponseBo addImg(AlbumImg ai) {
+        List<String> paths = Lists.newArrayList();
+        MultipartFile[] files = ai.getImgs();
+        for (MultipartFile file : files) {
+            if (null != file && !file.isEmpty()) {
+                ResponseBo r = FileUtils.addImg(file, imageConfig.getAlbumImgs() + "/" + ai.getAlbumId());
+                if (r.success()) {
+                    paths.add((String)r.getMsg());
+                } else {
+                    return r;
+                }
+            }
+        }
+        
+        //确定序号(获取最大的aiNo)
+        Integer albumId = ai.getAlbumId();
+        Integer aiNo = getLastAiNo(albumId);//this.albumImgMapper.selectCount(new AlbumImg());
+        aiNo++;
+        for (String path : paths) {
+            AlbumImg newImg = new AlbumImg();
+            newImg.setAiNo(aiNo++);
+            newImg.setAlbumId(albumId);
+            newImg.setImgPath(path);
+            this.albumImgMapper.insertSelective(newImg);
+        }
+        
+        return ResponseBo.ok("新增图片成功！");
+    }
+
+    @Override
+    public ResponseBo deleteImgs(String ids) {
+        List<String> list = Arrays.asList(ids.split(","));
+        Example example = new Example(AlbumImg.class);
+        example.createCriteria().andIn("aiId", list);
+        List<AlbumImg> ais = selectByExample(example);
+        if (CollectionUtils.isEmpty(ais)) {
+            return ResponseBo.ok("删除图片失败，找不到图片id！");
+        }
+        List<String> imgPaths = Lists.newArrayList();
+        for (AlbumImg ai : ais) {
+            imgPaths.add(ai.getImgPath());
+        }
+        //del imgs
+        FileUtils.delImgs(imgPaths);
+        this.batchDelete(list, "aiId", AlbumImg.class);
+        setAiNo(ais.get(0).getAlbumId());//重新排序
+        return ResponseBo.ok("删除图片成功！");
+    }
+
+    @Override
+    public ResponseBo move(AlbumImgForm form) {
+        try {
+            Integer albumId = form.getAlbumId();
+            AlbumImg target = this.selectByKey(form.getAiId());
+            List<AlbumImg> list = findImgs(albumId);
+            //改变顺序
+            list.remove(target);
+            list.add(form.getAiNo()-1, target);
+            
+            setAiNo(list);
+            return ResponseBo.ok("图片排序成功！");
+        } catch(Exception e) {
+            return ResponseBo.error("图片排序失败！");
+        }
+    }
+    
+    private void setAiNo(Integer albumId) {
+        List<AlbumImg> list = findImgs(albumId);
+        setAiNo(list);
+    }
+    private void setAiNo(List<AlbumImg> list) {
+        int aiNo = 1;
+        for(AlbumImg ai : list) {
+            ai.setAiNo(aiNo);
+            this.updateNotNull(ai);
+            aiNo++;
+        }
+    }
+    
+    private int getLastAiNo(Integer albumId) {
+        Example example = new Example(AlbumImg.class);
+        example.createCriteria().andEqualTo("albumId", albumId);
+        example.setOrderByClause("aiNo desc");
+         List<AlbumImg> list = this.albumImgMapper.selectByExample(example);
+        if (CollectionUtils.isEmpty(list)) return 0;
+        return list.get(0).getAiNo();
+    }
+    
+    private AlbumImg findImg(Integer albumId, Integer aiNo) {
+        AlbumImg img = new AlbumImg();
+        img.setAlbumId(albumId);
+        img.setAiNo(aiNo);
+        return this.albumImgMapper.selectOne(img);
+    }
+	
+}

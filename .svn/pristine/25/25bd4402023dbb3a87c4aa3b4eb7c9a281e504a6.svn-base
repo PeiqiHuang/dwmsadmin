@@ -1,0 +1,200 @@
+package com.dwms.user.service.impl;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import tk.mybatis.mapper.entity.Example;
+import tk.mybatis.mapper.entity.Example.Criteria;
+
+import com.dwms.common.config.ConstantConfig;
+import com.dwms.common.config.ImageConfig;
+import com.dwms.common.domain.ResponseBo;
+import com.dwms.common.service.impl.BaseService;
+import com.dwms.common.util.ExcelUtils;
+import com.dwms.common.util.FileUtils;
+import com.dwms.common.util.MD5Utils;
+import com.dwms.common.util.PathUtils;
+import com.dwms.common.util.UUIDUtils;
+import com.dwms.user.dao.UserMapper;
+import com.dwms.user.domain.User;
+import com.dwms.user.service.UserService;
+import com.google.common.collect.Lists;
+
+@Service("userService")
+@Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
+public class UserServiceImpl extends BaseService<User> implements UserService {
+
+    private Logger log = LoggerFactory.getLogger(this.getClass());
+
+    @Autowired
+    private ConstantConfig constantConfig;
+    @Autowired
+    private ImageConfig imageConfig;
+    @Autowired
+    private UserMapper userMapper;
+
+    @Override
+    public User findById(String userId) {
+    	User user = this.selectByKey(userId);
+    	if (StringUtils.isNotBlank(user.getAvatar())) {
+    		user.setAvatar(imageConfig.getAccessPath() + user.getAvatar());
+    	}
+    	return user;
+    }
+    
+    @Override
+    public User findByName(String userName) {
+        Example example = new Example(User.class);
+        example.createCriteria().andCondition("lower(username)=", userName.toLowerCase());
+        List<User> list = this.selectByExample(example);
+        return list.isEmpty() ? null : list.get(0);
+    }
+    
+    @Override
+    public User findByMobile(String mobile) {
+        Example example = new Example(User.class);
+        example.createCriteria().andCondition("mobile=", mobile.toLowerCase());
+        List<User> list = this.selectByExample(example);
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    @Override
+    public List<User> findAllUsers(User user) {
+    	try {
+			Example example = new Example(User.class);
+			Criteria criteria = example.createCriteria();
+			if (null != user.getPartyId()) {
+				criteria.andCondition("partyId = ", user.getPartyId());
+			}
+			if (StringUtils.isNotBlank(user.getUserName())) {
+				criteria.andCondition("userName like ", "%" + user.getUserName() + "%");
+			}
+			if (StringUtils.isNotBlank(user.getMobile())) {
+				criteria.andCondition("mobile = ", user.getMobile());
+			}
+			if (null != user.getGender()) {
+				criteria.andCondition("gender = ", user.getGender());
+			}
+			if (null != user.getPartyPosts()) {
+			    criteria.andCondition("partyPosts = ", user.getPartyPosts());
+			}
+			if (null != user.getPartyType()) {
+				criteria.andCondition("partyType = ", user.getPartyType());
+			}
+			if (null != user.getWorkStatus()) {
+				criteria.andCondition("workStatus = ", user.getWorkStatus());
+			}
+			if (null != user.getStatus()) {
+				criteria.andCondition("status = ", user.getStatus());
+			}
+			example.setOrderByClause("status desc, createTime desc");
+			List<User> users = this.selectByExample(example);
+			PathUtils.setImgAccessPath(users, "avatar");
+			return users;
+		} catch (Exception e) {
+			log.error("获取党员列表失败", e);
+			return new ArrayList<>();
+		}
+    }
+
+    @Override
+    @Transactional
+    public ResponseBo addUser(User user, MultipartFile file) {
+        user.setUserId(UUIDUtils.generateUUID());
+        ResponseBo r = checkMobile(user);
+        if (!r.success()) return r;
+        
+        if (null != file && !file.isEmpty()) {
+            r = FileUtils.saveImg(file, imageConfig.getUserAvatar() + "/" + user.getUserId());
+            if (r.success()) {
+                user.setAvatar((String)r.getMsg());
+            } else {
+                return r;
+            }
+    	}
+        // 密码 MD5 加密
+        String password = MD5Utils.md5(constantConfig.getUserDefaultPassword(), user.getUserId());
+        user.setPassword(password);
+        this.userMapper.insertSelective(user);
+        return ResponseBo.ok("新增党员成功！");
+    }
+
+
+    @Override
+    @Transactional
+    public ResponseBo updateUser(User user, MultipartFile file) {
+        ResponseBo r = checkMobile(user);
+        if (!r.success()) return r;
+        
+    	if (null != file && !file.isEmpty()) {
+    	    r = FileUtils.saveImg(file, imageConfig.getUserAvatar() + "/" + user.getUserId());
+            if (r.success()) {
+                user.setAvatar((String)r.getMsg());
+            } else {
+                return r;
+            }
+    	}
+        this.updateNotNull(user);
+        return ResponseBo.ok("修改党员成功！");
+    }
+
+    private ResponseBo checkMobile(User user) {
+        User u = findByMobile(user.getMobile());
+        if (null != u
+                && !StringUtils.equals(u.getUserId(), user.getUserId())) {
+            return ResponseBo.error("该手机号码已有党员注册使用！");
+        }
+        return ResponseBo.ok();
+    }
+
+    @Override
+    public ResponseBo batchUser(Integer partyId, MultipartFile batchFile) {
+        try {
+            List<User> users = ExcelUtils.readUserXls(batchFile.getInputStream());
+            Date createTime = new Date();
+            List<String> mobiles = Lists.newArrayList();
+            for (User user : users) {
+                if (mobiles.contains(user.getMobile())) {
+                    return ResponseBo.error("批量上传党员失败！请确保上传党员名单的手机号没有相同！"); 
+                } else {
+                    mobiles.add(user.getMobile());
+                }
+                user.setUserId(UUIDUtils.generateUUID());
+                user.setStatus(User.STATUS_VALID);
+                user.setPartyId(partyId);
+                // 密码 MD5 加密
+                String password = MD5Utils.md5(constantConfig.getUserDefaultPassword(), user.getUserId());
+                user.setPassword(password);
+                user.setUpdateTime(createTime);
+                user.setCreateTime(createTime);
+//                this.userMapper.insertSelective(user);
+            }
+            if (checkMobile(mobiles)) {
+                this.userMapper.insertList(users);
+            } else {
+                return ResponseBo.error("批量上传党员失败！请确保上传党员的手机号还没有注册！"); 
+            }
+        } catch (Exception e) {
+            log.error("批量上传党员失败", e);
+            return ResponseBo.error("批量上传党员失败！请确保上传文件数据填写完整正确！");
+        }
+        return ResponseBo.ok("批量上传党员成功！");
+    }
+    
+    private boolean checkMobile(List<String> mobiles) {
+        Example example = new Example(User.class);
+        example.createCriteria().andIn("mobile", mobiles);
+        List<User> list = this.selectByExample(example);
+        return list.isEmpty();
+    }
+}

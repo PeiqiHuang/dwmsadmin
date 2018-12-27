@@ -1,0 +1,89 @@
+<section class="content">
+    <header class="content__title">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">主页</li>
+        </ol>
+    </header>
+    <div class="main-content">
+        <div class="card-block"> </div>
+    </div>
+    <div data-th-include="common/footer"></div>
+    <div data-th-include="common/loading"></div><!-- 耗时操作等待提示 -->
+</section>
+<script>
+
+    var openLoading = function() {
+        $("#loadingModal").modal('show');
+    }
+    
+    var closeLoading = function() {
+        $("#loadingModal").modal('hide');
+    }
+    
+	// 打开二级页面
+	var openPage = function(url, target_text, noAppend) {
+	    if (noAppend) {
+	       //清空后面的
+	       var del = false;
+	       $("li.breadcrumb-item").each(function(i) {
+	           if (del) {
+	               $(this).remove();
+	           }
+	           if (!del && $(this).html().indexOf(url) > -1) {
+	               del = true;
+	           }
+	       })
+	    } else {
+	       $(".breadcrumb").append("<li class='breadcrumb-item'><a style='text-decoration:underline' href='javascript:openPage(\""+url+"\",\""+target_text+"\", true)'>" + target_text + "</a></li>");
+	    }
+    
+		$.post(ctx + url, {}, function (r) {
+	        if(r.code === 500){
+	            $MB.n_danger(r.msg);
+	            return;
+	        }
+	        if (r.indexOf('账户登录') !== -1) {
+	            location = location;
+	            return;
+	        }
+	        $main_content.html("").append(r);
+	    });
+	}	
+	
+	// 使后打开的模态窗优先级高
+	$(document).on("show.bs.modal", ".modal", function(event) {
+	   var zIndex = 2040 + 10 * $(".modal:visible").length;//1040阴影会遮住全部
+	   if(!$(this).hasClass("modal-backdrop"))
+	       $(this).css("z-index", zIndex);
+	});
+	
+	//表单日期验证（提示在messages_zh.min.js）
+	$.validator.methods.compareTime = function(value, element, param) {
+        var beginTime = jQuery(param).val();
+        
+        var date1 = new Date(Date.parse(beginTime.replace(/-/g, "/")));
+        var date2 = new Date(Date.parse(value.replace(/-/g, "/")));
+        return this.optional(element) || date1 < date2;
+    };
+	$.validator.methods.gtCurrent = function(value, element, param) {
+        var date1 = new Date();
+        var date2 = new Date(Date.parse(value.replace(/-/g, "/")));
+        return this.optional(element) || date1 < date2;
+    };
+	$.validator.methods.ltCurrent = function(value, element, param) {
+        var date1 = new Date();
+        var date2 = new Date(Date.parse(value.replace(/-/g, "/")));
+        return this.optional(element) || date1 > date2;
+    };
+    
+    //表格内容过长截断，alert弹出
+    var shortContent = function(value, length) {
+	    if (!length) {
+	        length = 25;
+	    }
+	    if (value.length < length)
+	        return value;
+	    else
+	        return "<a href='javascript:alert(\""+value+"\")'>"+value.substring(0, length)+"...</a>"; 
+	}
+</script>

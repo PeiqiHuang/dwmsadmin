@@ -1,0 +1,83 @@
+<div class="card">
+    <div data-th-include="notice/noticeAdd"></div>
+    <div class="card-block">
+        <div class="table-responsive">
+            <div id="data-table_wrapper" class="dataTables_wrapper">
+                <div class="dataTables_buttons hidden-sm-down actions">
+                    <span class="actions__item zmdi zmdi-search" onclick="search()" title="搜索" /> <span class="actions__item zmdi zmdi-refresh-alt" onclick="refresh()" title="刷新" />
+                    <div class="dropdown actions__item" shiro:hasAnyPermissions="notice:add,notice:delete,notice:update">
+                        <i data-toggle="dropdown" class="zmdi zmdi-more-vert"></i>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <a href="javascript:void(0)" class="dropdown-item" onclick="addEntity()" shiro:hasPermission="notice:add">新增通知</a>
+                            <a href="javascript:void(0)" class="dropdown-item" onclick="updateEntity()" shiro:hasPermission="notice:update">修改通知</a>
+                            <a href="javascript:void(0)" class="dropdown-item" onclick="deleteEntity()" shiro:hasPermission="notice:delete">删除通知</a>
+                        </div>
+                    </div>
+                </div>
+                <div id="data-table_filter" class="dataTables_filter">
+                    <form class="entity-table-form">
+                        <div class="row">
+                        	<div class="col-sm-3">
+                                <div class="input-group">
+                                    <span class="input-group-addon">
+					               	创建时间：
+					            </span>
+                                    <div class="form-group">
+                                        <input type="text" name="timeField" class="form-control">
+                                        <i class="form-group__bar"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="input-group">
+                                    <span class="input-group-addon"> 标题： </span>
+                                    <div class="form-group">
+                                        <input type="text" name="title" class="form-control"> <i class="form-group__bar"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="input-group">
+                                    <span class="input-group-addon"> 类型： </span>
+                                    <div class="form-group">
+                                        <select class="form-control" name="type">
+                                            <option value="" selected>所有</option>
+                                            <option value="1">文字消息</option>
+                                            <option value="2">图文消息</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="input-group">
+                                    <span class="input-group-addon"> 状态： </span>
+                                    <div class="form-group">
+                                        <select class="form-control" name="status">
+                                            <option value="" selected>所有</option>
+                                            <option value="1">已发布</option>
+                                            <option value="0">待发布</option>
+                                            <option value="-1">已取消</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="party" class="col-sm-3" th:if="${isAdmin}">
+                                <div class="input-group">
+                                    <span class="input-group-addon"> 党支部： </span>
+                                    <div class="form-group">
+                                        <select class="form-control" name="partyId">
+                                            <option value="" selected>所有</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <table id="entityTable" data-mobile-responsive="true" class="mb-bootstrap-table text-nowrap"></table>
+            </div>
+        </div>
+    </div>
+</div>
+<script data-th-src="@{js/app/notice/notice.js}"></script>
+<script data-th-src="@{js/app/notice/noticeEdit.js}"></script>

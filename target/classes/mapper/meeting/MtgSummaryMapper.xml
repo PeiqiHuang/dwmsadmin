@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dwms.meeting.dao.MtgSummaryMapper">
+  <resultMap id="BaseResultMap" type="com.dwms.meeting.domain.MtgSummary">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="sumId" jdbcType="INTEGER" property="sumId" />
+    <result column="mtgId" jdbcType="INTEGER" property="mtgId" />
+    <result column="sumTitle" jdbcType="VARCHAR" property="sumTitle" />
+    <result column="operator" jdbcType="VARCHAR" property="operator" />
+    <result column="source" jdbcType="TINYINT" property="source" />
+    <result column="filePath" jdbcType="VARCHAR" property="filePath" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+    <result column="releaseTime" jdbcType="TIMESTAMP" property="releaseTime" />
+    <result column="createTime" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+  
+  <select id="findAll" resultType="mtgSummary">
+  	select ms.*, if(u.userName is not null, u.userName, '管理员') operatorName from tb_meeting_summary ms 
+  	left join tb_user_info u on ms.operator=u.userId
+  	left join tb_sys_user su on ms.operator=su.USER_ID
+	where ms.mtgId = #{mtgId} and ms.status != -9
+	<if test="status != null">
+       	AND ms.status = #{status}
+    </if>
+	<if test="source != null and source != ''">
+       	AND ms.source = #{source}
+    </if>
+    order by ms.status desc, createTime asc
+  </select>
+  
+  <select id="findById" resultType="mtgSumWithUser">
+  	select ms.*, msu.userId from tb_meeting_summary ms 
+  	left join tb_meeting_summary_user msu on ms.sumId=msu.sumId
+	where ms.sumId = #{sumId}
+  </select>
+  
+</mapper>

@@ -1,0 +1,21 @@
+package com.dwms.questionine.service;
+
+import java.util.List;
+
+import com.dwms.common.domain.ResponseBo;
+import com.dwms.common.service.IService;
+import com.dwms.examine.domain.Question;
+
+public interface QuestionService extends IService<Question> {
+
+    List<Question> findAllQuestions(Question question);
+
+    void addQuestion(Question question);
+
+    void updateQuestion(Question question);
+
+    ResponseBo deleteQuestions(String ids);
+
+    List<Question> searchQuestions(Question question);
+
+}

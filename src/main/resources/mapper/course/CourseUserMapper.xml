@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dwms.course.dao.CourseUserMapper">
+  <resultMap id="BaseResultMap" type="com.dwms.course.domain.CourseUser">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="cuId" jdbcType="INTEGER" property="cuId" />
+    <result column="courseId" jdbcType="INTEGER" property="courseId" />
+    <result column="userId" jdbcType="VARCHAR" property="userId" />
+    <result column="timeLength" jdbcType="INTEGER" property="timeLength" />
+    <result column="status" jdbcType="TINYINT" property="status" />
+    <result column="finishTime" jdbcType="TIMESTAMP" property="finishTime" />
+    <result column="createTime" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="progress" jdbcType="INTEGER" property="progress" />
+    <result column="restChapter" jdbcType="INTEGER" property="restChapter" />
+  </resultMap>
+  
+  <select id="findAll" resultType="courseUser">
+    select cu.*, u.userName from tb_course_user cu 
+    left join tb_user_info u on cu.userId=u.userId
+    where cu.courseId = #{courseId}
+    <if test="userName != null and userName != ''">
+        AND u.userName like concat('%',#{userName},'%') 
+    </if>
+    <if test="status != null">
+        AND cu.status = #{status}
+    </if>
+    order by cu.status desc
+  </select>
+</mapper>

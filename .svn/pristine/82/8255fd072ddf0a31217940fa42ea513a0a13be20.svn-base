@@ -1,0 +1,224 @@
+package com.dwms.examine.domain;
+
+import java.util.Date;
+
+import javax.persistence.*;
+
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+@Table(name = "tb_question_info")
+@ToString
+public class Question {
+    
+    public static final int QUTYPE_SINGLE = 1;
+    public static final int QUTYPE_MULTIPLE = 2;
+    public static final int QUTYPE_FILL = 3;
+    public static final int QUTYPE_SHORT = 4;
+    
+    /**
+     * 题目ID
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer quId;
+
+    /**
+     * 党支部ID
+     */
+    private Integer partyId;
+
+    /**
+     * 题目标题
+     */
+    private String title;
+
+    /**
+     * 题目类型 1单选题 2多选题 3填空题 4简答题
+     */
+    private Integer quType;
+
+    /**
+     * 题目答案（选择题选项分号分隔 A.XXX;B.XXX;...）
+     */
+    private String answers;
+
+    /**
+     * 正确答案（多选题、多个空的填空题答案分号分隔 A;B;...）
+     */
+    private String rightKey;
+
+    /**
+     * 答案解析
+     */
+    private String analysis;
+
+    /**
+     * 状态 1.有效 0.禁用
+     */
+    private Integer status;
+    
+    /**
+     * 创建时间
+     */
+    private Date createTime;
+
+    // 用于搜索条件中的时间字段
+    @Transient
+    @Getter
+    @Setter
+    private String timeField;
+    
+    /**
+     * 获取题目ID
+     *
+     * @return quId - 题目ID
+     */
+    public Integer getQuId() {
+        return quId;
+    }
+
+    /**
+     * 设置题目ID
+     *
+     * @param quId 题目ID
+     */
+    public void setQuId(Integer quId) {
+        this.quId = quId;
+    }
+
+    /**
+     * 获取党支部ID
+     *
+     * @return partyId - 党支部ID
+     */
+    public Integer getPartyId() {
+        return partyId;
+    }
+
+    /**
+     * 设置党支部ID
+     *
+     * @param partyId 党支部ID
+     */
+    public void setPartyId(Integer partyId) {
+        this.partyId = partyId;
+    }
+
+    /**
+     * 获取题目标题
+     *
+     * @return title - 题目标题
+     */
+    public String getTitle() {
+        return title;
+    }
+
+    /**
+     * 设置题目标题
+     *
+     * @param title 题目标题
+     */
+    public void setTitle(String title) {
+        this.title = title == null ? null : title.trim();
+    }
+
+    /**
+     * 获取题目类型 1单选题 2多选题 3填空题 4简答题
+     *
+     * @return quType - 题目类型 1单选题 2多选题 3填空题 4简答题
+     */
+    public Integer getQuType() {
+        return quType;
+    }
+
+    /**
+     * 设置题目类型 1单选题 2多选题 3填空题 4简答题
+     *
+     * @param quType 题目类型 1单选题 2多选题 3填空题 4简答题
+     */
+    public void setQuType(Integer quType) {
+        this.quType = quType;
+    }
+
+    /**
+     * 获取题目答案（选择题选项分号分隔 A.XXX;B.XXX;...）
+     *
+     * @return answers - 题目答案（选择题选项分号分隔 A.XXX;B.XXX;...）
+     */
+    public String getAnswers() {
+        return answers;
+    }
+
+    /**
+     * 设置题目答案（选择题选项分号分隔 A.XXX;B.XXX;...）
+     *
+     * @param answers 题目答案（选择题选项分号分隔 A.XXX;B.XXX;...）
+     */
+    public void setAnswers(String answers) {
+        this.answers = answers == null ? null : answers.trim();
+    }
+
+    /**
+     * 获取正确答案（多选题、多个空的填空题答案分号分隔 A;B;...）
+     *
+     * @return rightKey - 正确答案（多选题、多个空的填空题答案分号分隔 A;B;...）
+     */
+    public String getRightKey() {
+        return rightKey;
+    }
+
+    /**
+     * 设置正确答案（多选题、多个空的填空题答案分号分隔 A;B;...）
+     *
+     * @param rightKey 正确答案（多选题、多个空的填空题答案分号分隔 A;B;...）
+     */
+    public void setRightKey(String rightKey) {
+        this.rightKey = rightKey == null ? null : rightKey.trim();
+    }
+
+    /**
+     * 获取答案解析
+     *
+     * @return analysis - 答案解析
+     */
+    public String getAnalysis() {
+        return analysis;
+    }
+
+    /**
+     * 设置答案解析
+     *
+     * @param analysis 答案解析
+     */
+    public void setAnalysis(String analysis) {
+        this.analysis = analysis == null ? null : analysis.trim();
+    }
+
+    /**
+     * 获取创建时间
+     *
+     * @return createTime - 创建时间
+     */
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    /**
+     * 设置创建时间
+     *
+     * @param createTime 创建时间
+     */
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+}

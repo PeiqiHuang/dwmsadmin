@@ -1,0 +1,50 @@
+<style>
+.img-selected {
+    border: #FF5652 3px solid;
+}
+.cover {
+    position:relative;
+    top:40px;
+    color: #FF5652;
+}
+.img-responsive {
+    width:100%;
+    margin:8px 0px;
+    cursor:move;
+}
+#sortable {
+    margin-right: 0px;
+    margin-left: 0px;
+}
+</style>
+<div class="card">
+    <div data-th-include="album/img/imgAdd"></div>
+    <div class="card-block">
+        <div class="table-responsive">
+            <div id="data-table_wrapper" class="dataTables_wrapper" style="height:30px;">
+                <div class="dataTables_buttons hidden-sm-down actions" shiro:hasPermission="album:img">
+                    <!-- <span class="actions__item zmdi zmdi-search" onclick="search()" title="搜索" /> <span class="actions__item zmdi zmdi-refresh-alt" onclick="refresh()" title="刷新" /> -->
+                    <span class="actions__item zmdi zmdi-collection-plus" data-toggle="modal" data-target="#entity-add" title="新增图片" />
+                    <span class="actions__item zmdi zmdi-collection-image" onclick="setCover()" title="设置封面" />
+                    <span class="actions__item zmdi zmdi-delete" onclick="deleteImg()" title="删除图片" />
+                </div>
+            </div>
+            <!-- <div class="row" style="margin-right: 0px;margin-left: 0px;" id="sortable">
+                <div class="col-sm-4" th:each="img:${imgs}">
+                    <img class='img-responsive' th:src='${img.imgPath}' th:attr="data-id=${img.aiId}"
+                        style="width:100%;margin:8px 0px;cursor:move;" />
+                </div>
+            </div> -->
+            <div class="row" id="sortable">
+                <div class="col-sm-4" hidden id="imgTpl">
+                    <!-- <span class="actions__item zmdi zmdi-collection-image cover"/> -->
+                    <img class='img-responsive' />
+                </div>
+            </div>
+            <input type="text" hidden id="albumId" th:value="${album.albumId}" />
+            <input type="text" hidden id="cover" th:value="${album.cover}" />
+        </div>
+    </div>
+</div>
+
+<script data-th-src="@{js/app/album/img/img.js}"></script>

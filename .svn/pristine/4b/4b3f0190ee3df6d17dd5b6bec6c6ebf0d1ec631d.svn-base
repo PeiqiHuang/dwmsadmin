@@ -1,0 +1,27 @@
+package com.dwms.common.config;
+
+public class FileProperties {
+
+	public static final String HTML = ".html";
+	
+    private String root;
+    
+    private String mtgSummary;
+
+	public String getRoot() {
+		return root;
+	}
+
+	public void setRoot(String root) {
+		this.root = root;
+	}
+
+	public String getMtgSummary() {
+		return root + mtgSummary;
+	}
+
+	public void setMtgSummary(String mtgSummary) {
+		this.mtgSummary = mtgSummary;
+	}
+    
+}

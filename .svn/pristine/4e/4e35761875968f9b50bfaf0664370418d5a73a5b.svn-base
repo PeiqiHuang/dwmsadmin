@@ -1,0 +1,25 @@
+package com.dwms.common.config;
+
+public class ImgProperties {
+
+    private String root;
+    
+    private String mtgSummary;
+
+	public String getRoot() {
+		return root;
+	}
+
+	public void setRoot(String root) {
+		this.root = root;
+	}
+
+	public String getMtgSummary() {
+		return mtgSummary;
+	}
+
+	public void setMtgSummary(String mtgSummary) {
+		this.mtgSummary = mtgSummary;
+	}
+    
+}

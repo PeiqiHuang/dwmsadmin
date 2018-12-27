@@ -1,0 +1,22 @@
+spring:
+    datasource:
+        druid:
+            # 数据库访问配置, 使用druid数据源
+            url: jdbc:mysql://120.26.54.153:3306/dwms?useUnicode=true&characterEncoding=utf8
+            username: dwms
+            password: dwms_20181114
+management:
+    endpoints:
+        enabled-by-default: false
+# 资源路径
+resource:
+    root: C:\apache-tomcat-7.0.75\webapps\dwmsres
+    url: /home/cpapptest/tomcat_dwms_12306/webapps
+    log: 
+        root: /log
+    file: 
+        root: /html
+        mtgSummary: /mtgSummary
+    img: 
+        root: /img
+        mtgSummary: /mtgSummary        

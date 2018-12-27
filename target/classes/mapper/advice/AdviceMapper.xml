@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dwms.advice.dao.AdviceMapper">
+  <resultMap id="BaseResultMap" type="com.dwms.advice.domain.Advice">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="adviceId" jdbcType="INTEGER" property="adviceId" />
+    <result column="userId" jdbcType="VARCHAR" property="userId" />
+    <result column="adviceText" jdbcType="VARCHAR" property="adviceText" />
+    <result column="createTime" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+  
+  <select id="findAllAdvices" resultType="advice">
+    select a.*, u.userName, p.partyName from tb_advice_info a 
+    left join tb_user_info u on a.userId=u.userId
+    left join tb_party_info p on p.partyId=u.partyId
+    where 1=1
+    <if test="adviceText != null and adviceText != ''">
+        AND a.adviceText like concat('%',#{adviceText},'%') 
+    </if>
+    <if test="userName != null and userName != ''">
+        AND u.userName like concat('%',#{userName},'%') 
+    </if>
+    <if test="timeField != null and timeField != ''">
+        AND date_format(a.createTime,'%Y-%m-%d') &gt;= #{beginField}
+        AND date_format(a.createTime,'%Y-%m-%d') &lt;= #{endField}
+    </if>
+    order by a.createTime desc
+  </select>    
+</mapper>

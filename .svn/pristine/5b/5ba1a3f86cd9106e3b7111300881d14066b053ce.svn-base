@@ -1,0 +1,115 @@
+package com.dwms.meeting.service.impl;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import tk.mybatis.mapper.entity.Example;
+
+import com.dwms.common.domain.ResponseBo;
+import com.dwms.common.service.impl.BaseService;
+import com.dwms.meeting.dao.MtgSummaryMapper;
+import com.dwms.meeting.dao.MtgUserMapper;
+import com.dwms.meeting.domain.MtgSummary;
+import com.dwms.meeting.domain.MtgUser;
+import com.dwms.meeting.service.MtgSummaryService;
+import com.google.common.collect.Lists;
+
+@Service("mtgSummaryService")
+@Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
+public class MtgSummaryServiceImpl extends BaseService<MtgSummary> implements MtgSummaryService {
+
+    private Logger log = LoggerFactory.getLogger(this.getClass());
+
+    @Autowired
+    private MtgSummaryMapper mtgSummaryMapper;
+
+    @Autowired
+    private MtgUserMapper mtgUserMapper;
+    
+	@Override
+	public List<MtgSummary> findAll(MtgSummary sum) {
+		if (null == sum.getMtgId()) {
+			log.error("获取会议纪要失败，会议ID缺失");
+			return new ArrayList<>();
+		}
+		try {
+			/*Example example = new Example(MtgSummary.class);
+			Criteria criteria = example.createCriteria();
+			criteria.andCondition("mtgId = ", sum.getMtgId());
+			if (null != sum.getSource()) {
+				criteria.andCondition("source = ", sum.getSource());
+			}
+			if (null != sum.getStatus()) {
+				criteria.andCondition("status = ", sum.getStatus());
+			}
+			example.setOrderByClause("status desc, createTime asc");
+			return this.selectByExample(example);*/
+			return this.mtgSummaryMapper.findAll(sum);
+		} catch (Exception e) {
+			log.error("获取会议纪要列表失败", e);
+			return new ArrayList<>();
+		}
+	}
+
+	@Override
+	public void addMtgSummary(MtgSummary sum, String[] users) {
+		this.mtgSummaryMapper.insertSelective(sum);
+		//更新允许查看的人员
+		updateMtgUserReadSum(sum, Arrays.asList(users));
+    }
+
+    private void updateMtgUserReadSum(MtgSummary sum, List<String> users) {
+    	Example example = new Example(MtgUser.class);
+    	example.createCriteria().andCondition("mtgId = ", sum.getMtgId());
+    	List<MtgUser> muList = this.mtgUserMapper.selectAll();
+    	
+    	for(MtgUser mu :muList) {
+    		int readSummary = MtgUser.READ_SUMMARY_NO;
+	    	for(String userId :users) {
+	    		if (StringUtils.equals(userId, mu.getUserId())) {
+	    			readSummary = MtgUser.READ_SUMMARY_YES;
+	    			break;
+	    		}
+	    	}
+	    	mu.setReadSummary(readSummary);
+	    	this.mtgUserMapper.updateByPrimaryKey(mu);
+    	}
+	}
+
+	@Override
+	public void updateMtgSummary(MtgSummary sum, String[] users) {
+		this.updateNotNull(sum);
+		//更新允许查看的人员
+		updateMtgUserReadSum(sum, Arrays.asList(users));
+	}
+
+	@Override
+	public ResponseBo deleteMtgSummarys(String ids) {
+		List<String> list = Arrays.asList(ids.split(","));
+		List<MtgSummary> mtgList = Lists.newArrayList();
+		for (String id : list) {
+			MtgSummary sum = selectByKey(NumberUtils.toInt(id));
+			if (sum.getSource() == MtgSummary.SOURCE_ADMIN) {
+				sum.setStatus(MtgSummary.STATUS_DELETE);
+				mtgList.add(sum);
+			} else {
+				return ResponseBo.error("删除会议失败，所选的会议只能是后台创建的！"); 
+			}
+		}
+		for(MtgSummary mtg : mtgList) {
+			this.updateNotNull(mtg);
+		}
+		return ResponseBo.ok("删除会议成功！");
+	}
+
+}

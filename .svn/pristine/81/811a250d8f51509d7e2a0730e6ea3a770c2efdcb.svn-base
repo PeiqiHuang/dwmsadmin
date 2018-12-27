@@ -1,0 +1,181 @@
+server:
+    tomcat:
+        uri-encoding: utf-8
+    servlet:
+        context-path: /dwmsadmin
+info:
+    app:
+        name: dwmsadmin
+        description: 党务秘书管理系统
+        version: '1.0'
+        spring-boot-version: 2.0.4.RELEASE
+spring:
+    application:
+        name: @project.build.finalName@
+    aop:
+        proxy-target-class: true
+        auto: true
+#    mvc:
+#        static-path-pattern: /**
+    profiles:
+        active: @spring.profiles.active@
+    http:
+        encoding:
+            enabled: true
+            charset: UTF-8
+            force: true
+    thymeleaf:
+        encoding: UTF-8
+        cache: false
+        mode: HTML
+        prefix: classpath:/templates/
+#        suffix: .html
+    jmx:
+        default-domain: @project.build.finalName@
+    messages:
+        encoding: UTF-8
+    servlet:
+        multipart:
+            enabled: true
+            max-file-size: 10MB
+            max-request-size: 20MB
+            file-size-threshold: 0 #默认写入磁盘
+    datasource:
+        type: com.alibaba.druid.pool.DruidDataSource
+        druid:
+            # 数据库访问配置, 使用druid数据源
+            db-type: com.alibaba.druid.pool.DruidDataSource
+            driverClassName: com.mysql.jdbc.Driver
+            #url: jdbc:mysql://127.0.0.1:3306/mrbird?useUnicode=true&characterEncoding=utf8
+            #username: root
+            #password:
+            url: jdbc:mysql://120.26.54.153:3306/dwms?useUnicode=true&amp;characterEncoding=utf8
+            username: dwms
+            password: dwms_20181114
+            # 连接池配置
+            initial-size: 5
+            min-idle: 5
+            max-active: 20
+            # 连接等待超时时间
+            max-wait: 30000
+            # 配置检测可以关闭的空闲连接间隔时间
+            time-between-eviction-runs-millis: 60000
+            # 配置连接在池中的最小生存时间
+            min-evictable-idle-time-millis: 300000
+            validation-query: select '1' from dual
+            test-while-idle: true
+            test-on-borrow: false
+            test-on-return: false
+            # 打开PSCache，并且指定每个连接上PSCache的大小
+            pool-prepared-statements: true
+            max-open-prepared-statements: 20
+            max-pool-prepared-statement-per-connection-size: 20
+            # 配置监控统计拦截的filters, 去掉后监控界面sql无法统计, 'wall'用于防火墙
+            filters: stat
+            # Spring监控AOP切入点，如 x.y.z.service.*,配置多个英文逗号分隔
+            aop-patterns: com.dwms..*.service.*
+            # WebStatFilter配置
+            web-stat-filter:
+                enabled: true
+                # 添加过滤规则
+                url-pattern: /*
+                # 忽略过滤的格式
+                exclusions: '*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*,/actuator/*'
+            # StatViewServlet配置
+            stat-view-servlet:
+                enabled: true
+                # 访问路径为/druid时，跳转到StatViewServlet
+                url-pattern: /druid/*
+                # 是否能够重置数据
+                reset-enable: false
+                # 需要账号密码才能访问控制台
+                login-username: dwms
+                login-password: dwms.@Pwd
+            # IP白名单
+            # allow: 127.0.0.1
+            # IP黑名单（共同存在时，deny优先于allow）
+            # deny: 192.168.1.218
+            # 配置StatFilter
+            filter:
+                stat:
+                    log-slow-sql: true
+#  cache:
+#    type: ehcache
+#    ehcache:
+#        config: classpath:ehcache.xml
+#    type:
+#      redis
+#spring boot admin配置开始
+#    boot:
+#        admin:
+#            client:
+#                url: http://localhost:8081
+#                username: dwms
+#                password: dwms.@Pwd
+#management:
+#    endpoints:
+#        web:
+#            exposure:
+#                include: '*'
+#    endpoint:
+#        health:
+#            show-details: ALWAYS
+# spring boot admin配置结束
+logging:
+    config: classpath:env/@spring.profiles.active@/log4j2.yml
+jasypt:
+    encryptor:
+        password: febs
+mybatis:
+    # type-aliases扫描路径
+    type-aliases-package: com.dwms
+    # mapper xml实现扫描路径
+    mapper-locations: classpath:mapper/**/*.xml
+    configuration:
+        jdbc-type-for-null: null
+        map-underscore-to-camel-case: false
+mapper:
+    mappers: com.dwms.common.config.MyMapper
+    not-empty: false
+    identity: MYSQL
+    style: normal
+#before: true
+pagehelper:
+    helperDialect: mysql
+    reasonable: true
+    supportMethodsArguments: true
+    params: count=countSql
+
+# dwms 配置
+dwms:
+    # 是否打印 sql语句
+    showsql: true
+    # 时间类型参数在前端页面的展示格式，默认格式为 yyyy-MM-dd HH:mm:ss
+    timeFormat: yyyy-MM-dd HH:mm:ss
+    # 是否开启 AOP 日志，默认开启
+    openAopLog: true
+    shiro:
+        # shiro redis缓存时长，默认1800秒
+        expireIn: 1800
+        # session 超时时间，默认1800000毫秒
+        sessionTimeout: 1800000
+        # rememberMe cookie有效时长，默认86400秒，即一天
+        cookieTimeout: 86400
+        # 免认证的路径配置，如静态资源，druid监控页面，注册页面，验证码请求等
+        anonUrl: /css/**,/js/**,/fonts/**,/img/**,/druid/**,/sysuser/regist,/gifCode,/,/actuator/**,/test/**
+        # 登录 url
+        loginUrl: /login
+        # 登录成功后跳转的 url
+        successUrl: /index
+        # 登出 url
+        logoutUrl: /logout
+        # 未授权跳转 url
+        unauthorizedUrl: /403
+    # 验证码
+    validateCode:
+        # 宽度，默认 146px
+        width: 146
+        # 高度，默认 33px
+        height: 33
+        # 验证码字符个数，默认4个字符
+        length: 4

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dwms.due.dao.DueAccountMapper">
+  <resultMap id="BaseResultMap" type="com.dwms.due.domain.DueAccount">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="accId" jdbcType="INTEGER" property="accId" />
+    <result column="accName" jdbcType="VARCHAR" property="accName" />
+    <result column="partyId" jdbcType="INTEGER" property="partyId" />
+    <result column="wechatFilePath" jdbcType="VARCHAR" property="wechatFilePath" />
+    <result column="alipayFilePath" jdbcType="VARCHAR" property="alipayFilePath" />
+    <result column="payeeName" jdbcType="VARCHAR" property="payeeName" />
+    <result column="payeeBank" jdbcType="VARCHAR" property="payeeBank" />
+    <result column="payeeAddress" jdbcType="VARCHAR" property="payeeAddress" />
+    <result column="payeeAccount" jdbcType="VARCHAR" property="payeeAccount" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+    <result column="tips" jdbcType="VARCHAR" property="tips" />
+    <result column="status" jdbcType="TINYINT" property="status" />
+    <result column="updateTime" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="createTime" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+</mapper>

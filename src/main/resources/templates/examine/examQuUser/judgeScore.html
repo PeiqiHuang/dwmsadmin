@@ -1,0 +1,80 @@
+<div class="modal fade" id="entity-add" data-keyboard="false" data-backdrop="static" ><!-- tabindex="-1" 去掉，否则日期控件不能选择年月下拉 -->
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title pull-left" id="entity-add-modal-title">判分</h3>
+            </div>
+            <div class="modal-body">
+                <form id="entity-add-form">
+                    <input type="text" hidden name="equId">
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="input-group">
+                                <span class="input-group-addon">
+					               	 题目：
+					            </span>
+                                <div class="form-group">
+                                    <input type="text" readonly id="title" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="input-group">
+                                <span class="input-group-addon">
+					               	 分数：
+					            </span>
+                                <div class="form-group">
+                                    <input type="text" readonly id="score" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="input-group">
+                                <span class="input-group-addon">
+                                                                                                           正确答案：
+					            </span>
+                                <div class="form-group">
+                                    <input type="text" readonly id="rightKey" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="input-group">
+                                <span class="input-group-addon">
+                                                                                                           回答：
+					            </span>
+                                <div class="form-group">
+                                    <input type="text" readonly id="answer" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="input-group">
+                                <span class="input-group-addon">
+                                                                                                           得分：
+					            </span>
+                                <div class="form-group">
+                                    <input type="text" name="score" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-save" id="entity-add-button" name="save">提交</button>
+                <button type="button" class="btn btn-secondary btn-close">关闭</button>
+                <button class="btn-hide"></button>
+            </div>
+        </div>
+    </div>
+</div>
+<script data-th-src="@{js/app/examine/examQuUser/judgeScore.js}"></script>

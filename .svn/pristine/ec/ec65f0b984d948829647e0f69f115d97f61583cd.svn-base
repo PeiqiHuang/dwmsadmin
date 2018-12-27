@@ -1,0 +1,30 @@
+<section class="content">
+    <header class="content__title">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">主页</li>
+        </ol>
+    </header>
+    <div class="main-content">
+        <div class="card-block"> </div>
+    </div>
+    <div data-th-include="common/footer"></div>
+</section>
+<script>
+	// 打开二级页面
+	var openPage = function(url, target_text) {
+	
+	    $(".breadcrumb").append("<li class='breadcrumb-item'>" + target_text + "</li>");
+    
+		$.post(ctx + url, {}, function (r) {
+	        if(r.code === 500){
+	            $MB.n_danger(r.msg);
+	            return;
+	        }
+	        if (r.indexOf('账户登录') !== -1) {
+	            location = location;
+	            return;
+	        }
+	        $main_content.html("").append(r);
+	    });
+	}	
+</script>

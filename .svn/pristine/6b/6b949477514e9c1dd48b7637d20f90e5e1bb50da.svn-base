@@ -1,0 +1,88 @@
+function addEntity() {
+	ajaxGetVals();
+	$('#entity-add').modal();
+}
+
+function updateEntity() {
+	var selected = $("#entityTable").bootstrapTable('getSelections');
+    var selected_length = selected.length;
+    if (!selected_length) {
+        $MB.n_warning('请勾选需要修改的考试！');
+        return;
+    }
+    if (selected_length > 1) {
+        $MB.n_warning('一次只能修改一个考试！');
+        return;
+    }
+    var entityId = selected[0].examId;
+    $.post(ctx + "exam/getExam", {"examId": entityId}, function (r) {
+        if (r.code === 0) {
+        	$("#entity-add-modal-title").html('修改考试');
+        	$("#entity-add-button").attr("name", "update");
+            var $form = $('#entity-add');
+            var entity = r.msg;
+            showModal($form, entity);
+            //已发布已开始的考试不能编辑
+            //if (entity.progress > 0 && entity.status == 1) $("#entity-add-button").prop("hidden", true);
+        } else {
+            $MB.n_danger(r.msg);
+        }
+    });
+}
+
+function copyEntity() {
+	var selected = $("#entityTable").bootstrapTable('getSelections');
+	var selected_length = selected.length;
+	if (!selected_length) {
+		$MB.n_warning('请勾选需要复制的考试！');
+		return;
+	}
+	if (selected_length > 1) {
+		$MB.n_warning('一次只能复制一个考试！');
+		return;
+	}
+	var entityId = selected[0].examId;
+	$.post(ctx + "exam/getExam", {"examId": entityId}, function (r) {
+		if (r.code === 0) {
+			$("#entity-add-modal-title").html('复制考试');
+			$("#entity-add-button").attr("name", "save");//保存相当于新建
+			var $form = $('#entity-add');
+			var entity = r.msg;
+			entity.examId = '';
+			entity.status = 0; //复制的默认待发布
+			showModal($form, entity);
+		} else {
+			$MB.n_danger(r.msg);
+		}
+	});
+}
+
+function showModal($form, entity) {
+	$form.modal();
+    $form.find("input[name='examId']").val(entity.examId);
+    $form.find("input[name='partyId']").val(entity.partyId);
+    $form.find("input[name='examName']").val(entity.examName);
+    $form.find("input[name='examDesc']").val(entity.examDesc);
+    $form.find("input[name='totalScore']").val(entity.totalScore);
+    $form.find("input[name='passScore']").val(entity.passScore);
+    $form.find("input[name='timeLength']").val(entity.timeLength);
+    $form.find("input[name='quNum']").val(entity.quNum);
+    $("input:radio[name='showType'][value='" + entity.showType + "']").prop("checked", true);
+    $form.find("input[name='showTime']").val(entity.showTime);
+    if (entity.showType == 1) $("#showTime").prop("hidden", false);
+    $("input:radio[name='status'][value='" + entity.status + "']").prop("checked", true);
+    $form.find("input[name='beginTime']").val(entity.beginTime);
+    $form.find("input[name='endTime']").val(entity.endTime);
+    setPushMsg(entity.pushMsg);
+    setEndMsg(entity.endMsg);
+    //previewer
+    previewerSelect.selected = entity.previewer;
+    //参会党员
+    usersSelect.selected = entity.userIds;
+    if (!isAdmin) { // 超管时select_node.jstree事件设置值
+    	ajaxGetVals(entity.partyId);
+    }
+    // 设值party会自动触发select_node.jstree事件
+    partyTreeSelect(entity.partyId);
+    
+}

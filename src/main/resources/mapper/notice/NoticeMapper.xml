@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dwms.notice.dao.NoticeMapper">
+  <resultMap id="BaseResultMap" type="com.dwms.notice.domain.Notice">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="ntiId" jdbcType="INTEGER" property="ntiId" />
+    <result column="partyId" jdbcType="INTEGER" property="partyId" />
+    <result column="title" jdbcType="VARCHAR" property="title" />
+    <result column="subTitle" jdbcType="VARCHAR" property="subTitle" />
+    <result column="cover" jdbcType="VARCHAR" property="cover" />
+    <result column="type" jdbcType="TINYINT" property="type" />
+    <result column="filePath" jdbcType="VARCHAR" property="filePath" />
+    <result column="operator" jdbcType="VARCHAR" property="operator" />
+    <result column="status" jdbcType="TINYINT" property="status" />
+    <result column="releaseTime" jdbcType="TIMESTAMP" property="releaseTime" />
+    <result column="updateTime" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="createTime" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+</mapper>

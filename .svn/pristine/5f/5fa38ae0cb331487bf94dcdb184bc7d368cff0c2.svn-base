@@ -1,0 +1,90 @@
+package com.dwms.user.service.impl;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import tk.mybatis.mapper.entity.Example;
+import tk.mybatis.mapper.entity.Example.Criteria;
+
+import com.dwms.common.service.impl.BaseService;
+import com.dwms.common.util.UUIDUtils;
+import com.dwms.user.dao.UserMapper;
+import com.dwms.user.domain.User;
+import com.dwms.user.service.UserService;
+
+@Service("userService")
+@Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
+public class UserServiceImpl extends BaseService<User> implements UserService {
+
+    private Logger log = LoggerFactory.getLogger(this.getClass());
+
+    @Autowired
+    private UserMapper userMapper;
+
+    @Override
+    public User findByName(String userName) {
+        Example example = new Example(User.class);
+        example.createCriteria().andCondition("lower(username)=", userName.toLowerCase());
+        List<User> list = this.selectByExample(example);
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    @Override
+    public List<User> findAllUsers(User user) {
+    	try {
+			Example example = new Example(User.class);
+			Criteria criteria = example.createCriteria();
+			if (null != user.getPartyId()) {
+				criteria.andCondition("partyId = ", user.getPartyId());
+			}
+			if (StringUtils.isNotBlank(user.getUserName())) {
+				criteria.andCondition("userName like ", "%" + user.getUserName() + "%");
+			}
+			if (StringUtils.isNotBlank(user.getMobile())) {
+				criteria.andCondition("mobile = ", user.getMobile());
+			}
+			if (null != user.getGender()) {
+				criteria.andCondition("gender = ", user.getGender());
+			}
+			if (null != user.getPartyType()) {
+				criteria.andCondition("partyType = ", user.getPartyType());
+			}
+			if (null != user.getWorkStatus()) {
+				criteria.andCondition("workStatus = ", user.getWorkStatus());
+			}
+			if (null != user.getStatus()) {
+				criteria.andCondition("status = ", user.getStatus());
+			}
+			example.setOrderByClause("status desc, createTime desc");
+			return this.selectByExample(example);
+		} catch (Exception e) {
+			log.error("获取党员列表失败", e);
+			return new ArrayList<>();
+		}
+    }
+
+    @Override
+    @Transactional
+    public void addUser(User user) {
+        //user.setCreateTime(new Date());
+        user.setUserId(UUIDUtils.generateUUID());
+        //this.save(user);
+        this.userMapper.insertSelective(user);
+    }
+
+
+    @Override
+    @Transactional
+    public void updateUser(User user) {
+        this.updateNotNull(user);
+    }
+}

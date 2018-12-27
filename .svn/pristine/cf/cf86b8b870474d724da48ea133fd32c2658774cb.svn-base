@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dwms.system.dao.SysUserMapper">
+  <resultMap id="BaseResultMap" type="com.dwms.system.domain.SysUser">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="USER_ID" jdbcType="DECIMAL" property="userId" />
+    <result column="USERNAME" jdbcType="VARCHAR" property="username" />
+    <result column="PASSWORD" jdbcType="VARCHAR" property="password" />
+    <result column="partyId" jdbcType="DECIMAL" property="partyId" />
+    <result column="EMAIL" jdbcType="VARCHAR" property="email" />
+    <result column="MOBILE" jdbcType="VARCHAR" property="mobile" />
+    <result column="STATUS" jdbcType="CHAR" property="status" />
+    <result column="CRATE_TIME" jdbcType="TIMESTAMP" property="crateTime" />
+    <result column="MODIFY_TIME" jdbcType="TIMESTAMP" property="modifyTime" />
+    <result column="LAST_LOGIN_TIME" jdbcType="TIMESTAMP" property="lastLoginTime" />
+    <result column="SSEX" jdbcType="CHAR" property="ssex" />
+    <result column="THEME" jdbcType="VARCHAR" property="theme" />
+    <result column="AVATAR" jdbcType="VARCHAR" property="avatar" />
+    <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
+  </resultMap>
+  
+  <select id="findSysUserWithParty" resultType="sysUser" parameterType="sysUser">
+  		select u.user_id userId,u.username,u.email,u.mobile,u.status,u.crate_time crateTime,
+  		u.ssex,d.partyName from tb_sys_user u 
+  		left join tb_party_info d on(u.partyId = d.partyId)
+  		where 1=1
+  		<if test="username != null and username != ''">
+        	AND u.username = #{username}
+	    </if>
+	    <if test="partyId != null and partyId != ''">
+	        AND d.partyId = #{partyId}
+	    </if>
+  		<if test="ssex != null and ssex != ''">
+	        AND u.ssex = #{ssex}
+	    </if>
+	    <if test="status != null and status != ''">
+	        AND u.status = #{status}
+	    </if>
+  		order by u.user_id
+  </select>
+  
+    
+  <select id="findSysUserWithRole" resultType="sysUserWithRole">
+		select u.user_id userId,u.username,u.partyId,u.email,u.mobile,
+		u.status,u.ssex,ur.role_id roleId from tb_sys_user u
+		left join tb_sys_user_role ur on (u.user_id = ur.user_id)
+		where u.user_id = #{userId}
+  </select>
+  
+  <select id="findSysUserProfile" resultType="sysUser" parameterType="sysUser">
+	SELECT
+		U .USERNAME,
+		U .USER_ID userId,
+		D .partyName,
+		U .mobile,
+		U .email,
+		U .avatar,
+		U .description,
+		U .ssex,
+		U .partyId,
+		group_concat(r.role_name) AS roleName
+	FROM
+		tb_sys_user U
+	LEFT JOIN tb_party_info D ON U .partyId = D .partyId
+	LEFT JOIN tb_sys_user_role ur ON U .user_id = ur.user_id
+	LEFT JOIN tb_sys_role r ON r.role_id = ur.role_id
+	WHERE
+		U .USER_ID = #{userId}
+	GROUP BY
+		U .username,
+		D .partyName,
+		U .mobile,
+		U .email,
+		U .avatar,
+		U .description,
+		U .ssex,
+		U .USER_ID,
+		U .partyId
+  </select>
+  
+</mapper>

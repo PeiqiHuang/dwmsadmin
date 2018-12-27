@@ -1,0 +1,364 @@
+package com.dwms.user.domain;
+
+import java.util.Date;
+
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+import lombok.ToString;
+
+import com.dwms.common.annotation.ExportConfig;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+@Table(name = "tb_user_info")
+@ToString
+public class User {
+	
+	/**
+	 * 状态
+	 */
+	public static final int STATUS_VALID = 1;
+	public static final int STATUS_LOCK = 0;
+	
+    /**
+     * 用户id
+     */
+    @Id
+    //@GeneratedValue(strategy = GenerationType.IDENTITY, generator = "SELECT REPLACE(UUID(),'-','')")
+    //@GeneratedValue(generator="UUID")
+    @ExportConfig(value = "编号")
+    private String userId;
+
+    /**
+     * 用户姓名
+     */
+    @ExportConfig(value = "用户姓名")
+    private String userName;
+
+    /**
+     * 手机号
+     */
+    @ExportConfig(value = "手机号")
+    private String mobile;
+
+    /**
+     * 密码
+     */
+    private String password;
+
+    /**
+     * 头像
+     */
+    private String avatar;
+    
+    /**
+     * 性别
+     */
+    @ExportConfig(value = "性别", convert = "s:0=未知,1=男,2=女")
+    private Integer gender;
+
+    /**
+     * 党员类型 1申请入党人 2入党积极分子 3发展对象 4预备党员 5正式党员
+     */
+    @ExportConfig(value = "党员类型", convert = "s:1=申请入党人,2=入党积极分子,3=发展对象,4=预备党员,5=正式党员")
+    private Integer partyType;
+
+    /**
+     * 工作状态 0离职 1在岗 2在职
+     */
+    @ExportConfig(value = "工作状态", convert = "s:0=离职,1=在岗,1=在职")
+    private Integer workStatus;
+
+    /**
+     * 党内职务 1普通党员 2支部委员 3支部副书记 4支部书记
+     */
+    @ExportConfig(value = "党内职务")
+    private Integer partyPosts;
+
+    /**
+     * 转为预备党员日期
+     */
+    @ExportConfig(value = "转为预备党员日期", convert = "c:com.dwms.common.util.poi.convert.DateConvert")
+    @JsonFormat(pattern="yyyy-MM-dd")
+    private Date probationaryTime;
+
+    /**
+     * 转为正式党员日期
+     */
+    @ExportConfig(value = "转为正式党员日期", convert = "c:com.dwms.common.util.poi.convert.DateConvert")
+    @JsonFormat(pattern="yyyy-MM-dd")
+    private Date fullTime;
+
+    /**
+     * 状态 0禁用 1启用
+     */
+    @ExportConfig(value = "状态", convert = "s:0=禁用,1=启用")
+    private Byte status;
+
+    /**
+     * 党支部ID
+     */
+    private Integer partyId;
+    
+    /**
+     * 创建时间
+     */
+    @ExportConfig(value = "创建时间", convert = "c:com.dwms.common.util.poi.convert.TimeConvert")
+    private Date createTime;
+
+    /**
+     * 修改时间
+     */
+    @ExportConfig(value = "修改时间", convert = "c:com.dwms.common.util.poi.convert.TimeConvert")
+    private Date updateTime;
+
+    /**
+     * 获取用户id
+     *
+     * @return userId - 用户id
+     */
+    public String getUserId() {
+        return userId;
+    }
+
+    /**
+     * 设置用户id
+     *
+     * @param userId 用户id
+     */
+    public void setUserId(String userId) {
+        this.userId = userId == null ? null : userId.trim();
+    }
+
+    /**
+     * 获取用户姓名
+     *
+     * @return userName - 用户姓名
+     */
+    public String getUserName() {
+        return userName;
+    }
+
+    /**
+     * 设置用户姓名
+     *
+     * @param userName 用户姓名
+     */
+    public void setUserName(String userName) {
+        this.userName = userName == null ? null : userName.trim();
+    }
+
+    /**
+     * 获取手机号
+     *
+     * @return mobile - 手机号
+     */
+    public String getMobile() {
+        return mobile;
+    }
+
+    /**
+     * 设置手机号
+     *
+     * @param mobile 手机号
+     */
+    public void setMobile(String mobile) {
+        this.mobile = mobile == null ? null : mobile.trim();
+    }
+
+    /**
+     * 获取密码
+     *
+     * @return password - 密码
+     */
+    public String getPassword() {
+        return password;
+    }
+
+    /**
+     * 设置密码
+     *
+     * @param password 密码
+     */
+    public void setPassword(String password) {
+        this.password = password == null ? null : password.trim();
+    }
+
+    /**
+     * 获取头像
+     *
+     * @return avatar - 头像
+     */
+    public String getAvatar() {
+        return avatar;
+    }
+
+    /**
+     * 设置头像
+     *
+     * @param avatar 头像
+     */
+    public void setAvatar(String avatar) {
+        this.avatar = avatar == null ? null : avatar.trim();
+    }
+
+    public Integer getGender() {
+		return gender;
+	}
+
+	public void setGender(Integer gender) {
+		this.gender = gender;
+	}
+
+	/**
+     * 获取党员类型 1申请入党人 2入党积极分子 3发展对象 4预备党员 5正式党员
+     *
+     * @return partyType - 党员类型 1申请入党人 2入党积极分子 3发展对象 4预备党员 5正式党员
+     */
+    public Integer getPartyType() {
+        return partyType;
+    }
+
+    /**
+     * 设置党员类型 1申请入党人 2入党积极分子 3发展对象 4预备党员 5正式党员
+     *
+     * @param partyType 党员类型 1申请入党人 2入党积极分子 3发展对象 4预备党员 5正式党员
+     */
+    public void setPartyType(Integer partyType) {
+        this.partyType = partyType;
+    }
+
+    /**
+     * 获取工作状态 0离职 1在岗 2在职
+     *
+     * @return workStatus - 工作状态 0离职 1在岗 2在职
+     */
+    public Integer getWorkStatus() {
+        return workStatus;
+    }
+
+    /**
+     * 设置工作状态 0离职 1在岗 2在职
+     *
+     * @param workStatus 工作状态 0离职 1在岗 2在职
+     */
+    public void setWorkStatus(Integer workStatus) {
+        this.workStatus = workStatus;
+    }
+
+    /**
+     * 获取党内职务
+     *
+     * @return partyPosts - 党内职务
+     */
+    public Integer getPartyPosts() {
+        return partyPosts;
+    }
+
+    /**
+     * 设置党内职务
+     *
+     * @param partyPosts 党内职务
+     */
+    public void setPartyPosts(Integer partyPosts) {
+        this.partyPosts = partyPosts;
+    }
+
+    /**
+     * 获取转为预备党员日期
+     *
+     * @return probationaryTime - 转为预备党员日期
+     */
+    public Date getProbationaryTime() {
+        return probationaryTime;
+    }
+
+    /**
+     * 设置转为预备党员日期
+     *
+     * @param probationaryTime 转为预备党员日期
+     */
+    public void setProbationaryTime(Date probationaryTime) {
+        this.probationaryTime = probationaryTime;
+    }
+
+    /**
+     * 获取转为正式党员日期
+     *
+     * @return fullTime - 转为正式党员日期
+     */
+    public Date getFullTime() {
+        return fullTime;
+    }
+
+    /**
+     * 设置转为正式党员日期
+     *
+     * @param fullTime 转为正式党员日期
+     */
+    public void setFullTime(Date fullTime) {
+        this.fullTime = fullTime;
+    }
+
+    /**
+     * 获取状态 0禁用 1启用
+     *
+     * @return status - 状态 0禁用 1启用
+     */
+    public Byte getStatus() {
+        return status;
+    }
+
+    /**
+     * 设置状态 0禁用 1启用
+     *
+     * @param status 状态 0禁用 1启用
+     */
+    public void setStatus(Byte status) {
+        this.status = status;
+    }
+
+    public Integer getPartyId() {
+		return partyId;
+	}
+
+	public void setPartyId(Integer partyId) {
+		this.partyId = partyId;
+	}
+
+	/**
+     * 获取创建时间
+     *
+     * @return createTime - 创建时间
+     */
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    /**
+     * 设置创建时间
+     *
+     * @param createTime 创建时间
+     */
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+
+    /**
+     * 获取修改时间
+     *
+     * @return updateTime - 修改时间
+     */
+    public Date getUpdateTime() {
+        return updateTime;
+    }
+
+    /**
+     * 设置修改时间
+     *
+     * @param updateTime 修改时间
+     */
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
+    }
+}

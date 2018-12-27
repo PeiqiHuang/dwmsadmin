@@ -1,0 +1,7 @@
+package com.dwms.course.dao;
+
+import com.dwms.common.config.MyMapper;
+import com.dwms.course.domain.CourseChapter;
+
+public interface CourseChapterMapper extends MyMapper<CourseChapter> {
+}

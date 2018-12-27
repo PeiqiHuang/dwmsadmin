@@ -1,0 +1,11 @@
+package com.dwms.examine.dao;
+
+import java.util.List;
+
+import com.dwms.common.config.MyMapper;
+import com.dwms.examine.domain.ExamUser;
+
+public interface ExamUserMapper extends MyMapper<ExamUser> {
+
+    List<ExamUser> findAllByExamId(ExamUser examUser);
+}

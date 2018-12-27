@@ -1,0 +1,99 @@
+package com.dwms.course.service.impl;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import tk.mybatis.mapper.entity.Example;
+import tk.mybatis.mapper.entity.Example.Criteria;
+
+import com.dwms.common.domain.ResponseBo;
+import com.dwms.common.service.impl.BaseService;
+import com.dwms.course.dao.CourseCatMapper;
+import com.dwms.course.dao.CourseMapper;
+import com.dwms.course.domain.Course;
+import com.dwms.course.domain.CourseCat;
+import com.dwms.course.service.CourseCatService;
+import com.google.common.collect.Lists;
+
+@Service("courseCatService")
+@Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
+public class CourseCatServiceImpl extends BaseService<CourseCat> implements CourseCatService {
+
+    private Logger log = LoggerFactory.getLogger(this.getClass());
+
+    @Autowired
+    private CourseMapper courseMapper;
+    
+    @Autowired
+    private CourseCatMapper courseCatMapper;
+
+    @Override
+    public List<CourseCat> findAll(CourseCat cat) {
+    	try {
+			Example example = new Example(CourseCat.class);
+			Criteria criteria = example.createCriteria();
+			if (null != cat.getPartyId()) {
+				criteria.andCondition("partyId = ", cat.getPartyId());
+			}
+			if (StringUtils.isNotBlank(cat.getCategoryName())) {
+				criteria.andCondition("categoryName like ", "%" + cat.getCategoryName() + "%");
+			}
+			if (null != cat.getStatus()) {
+				criteria.andCondition("status = ", cat.getStatus());
+			}
+			example.setOrderByClause("status desc, weight desc");
+			List<CourseCat> courses = this.selectByExample(example);
+			return courses;
+		} catch (Exception e) {
+			log.error("获取党课分类列表失败", e);
+			return new ArrayList<>();
+		}
+    }
+
+    @Override
+    @Transactional
+    public ResponseBo addCourseCat(CourseCat cat) {
+        this.courseCatMapper.insertSelective(cat);
+        return ResponseBo.ok("新增党课分类成功！");
+    }
+
+	@Override
+    @Transactional
+    public ResponseBo updateCourseCat(CourseCat cat) {
+        this.updateNotNull(cat);
+        return ResponseBo.ok("修改党课分类成功！");
+    }
+
+	@Override
+	@Transactional
+	public ResponseBo deleteCourseCats(String ids) {
+		List<String> list = Arrays.asList(ids.split(","));
+		List<CourseCat> catList = Lists.newArrayList();
+		for (String id : list) {
+			CourseCat cat = selectByKey(NumberUtils.toInt(id));
+			Example example = new Example(CourseCat.class);
+			example.createCriteria().andCondition("categoryId = ", id);
+            List<Course> courses = this.courseMapper.selectByExample(example);
+            if (CollectionUtils.isNotEmpty(courses))
+                return ResponseBo.error(String.format("删除党课分类失败，有党课已经选择了分类'%s'！", cat.getCategoryName())); 
+            else
+                catList.add(cat);
+		}
+		for(CourseCat cat : catList) {
+			this.delete(cat);
+		}
+		return ResponseBo.ok("删除党课分类成功！");
+	}
+
+}

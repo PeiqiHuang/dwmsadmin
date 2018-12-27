@@ -1,0 +1,68 @@
+package com.dwms.common.config;
+
+import com.dwms.common.util.YamlFactory;
+
+import lombok.Data;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.PropertySources;
+
+import java.util.List;
+
+/**
+ * 图片配置
+ * @author windy
+ * @date 2016-12-15
+ */
+@Data
+@Configuration
+@PropertySources(@PropertySource(value = "classpath:env/${spring.profiles.active}/sys.yml", factory = YamlFactory.class))
+public class ImageConfig {
+
+    @Value("${image.uploadpath}")
+    private String uploadPath;// 图片上传路径
+    @Value("${image.accesspath}")
+    private String accessPath;// 图片访问路径
+    @Value("#{'${image.types}'.split(',')}")
+    private List<String> imageTypes;// 常见图片类型
+    
+    @Value("${image.root}")
+    private String root;//根地址
+
+    @Value("${image.user.avatar}")
+    private String userAvatar;//用户头像
+
+    @Value("${image.mtgSummary}")
+    private String mtgSummary;//会议纪要
+    
+    @Value("${image.course.cover}")
+    private String courseCover;//微党课封面
+    
+    @Value("${image.course.banner}")
+    private String courseBanner;//微党课顶部图片
+    
+    @Value("${image.due.user}")
+    private String due;//缴费上传凭证
+    
+    @Value("${image.due.account.root}")
+    private String dueAccount;//缴费账户
+    
+    @Value("${image.due.account.wechat}")
+    private String accountWechat;
+    
+    @Value("${image.due.account.alipay}")
+    private String accountAlipay;
+    
+    @Value("${image.album.cover}")
+    private String albumCover;//党建相册封面
+    @Value("${image.album.imgs}")
+    private String albumImgs;//党建相册图片
+    
+    @Value("${image.notice}")
+    private String notice;//通知
+    
+    @Value("${image.advert}")
+    private String advert;//广告
+}

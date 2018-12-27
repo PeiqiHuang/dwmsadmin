@@ -1,0 +1,232 @@
+package com.dwms.examine.domain;
+
+import java.util.Date;
+
+import javax.persistence.*;
+
+import com.dwms.common.annotation.ExportConfig;
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Table(name = "tb_examine_user")
+public class ExamUser {
+    /**
+     * 状态
+     */
+    public static final int STATUS_NOT_SUBMIT = -1;
+    public static final int STATUS_FAIL = 0;
+    public static final int STATUS_WAIT = 1;
+    public static final int STATUS_PASS = 2;
+    /**
+     * 考试类型
+     */
+    public static final int TYPE_FIRST = 1;
+    public static final int TYPE_MAKEUP = 2;
+    
+    /**
+     * 考试人员ID
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer euId;
+
+    /**
+     * 试卷ID
+     */
+    private Integer examId;
+
+    /**
+     * 参与党员
+     */
+    private String userId;
+    
+    @Transient
+    @Getter
+    @Setter
+    @ExportConfig(value = "考试人员")
+    private String userName;
+
+    /**
+     * 考试得分
+     */
+    @ExportConfig(value = "考试得分")
+    private Integer score;
+
+    /**
+     * 考试类型  0正考 1补考
+     */
+    @ExportConfig(value = "考试类型", convert = "s:1=正考,2=补考")
+    private Integer examType;
+
+    /**
+     * 状态  -1未提交 0未通过 1待判分 2已通过
+     */
+    @ExportConfig(value = "状态 ", convert = "s:-1=未提交,0=未通过,1=待判分,2=已通过")
+    private Integer status;
+
+    /**
+     * 提交时间
+     */
+    @ExportConfig(value = "提交时间", convert = "c:com.dwms.common.util.poi.convert.TimeConvert")
+    private Date finishTime;
+
+    /**
+     * 创建时间
+     */
+    @ExportConfig(value = "创建时间", convert = "c:com.dwms.common.util.poi.convert.TimeConvert")
+    private Date createTime;
+
+    /**
+     * 获取考试人员ID
+     *
+     * @return euId - 考试人员ID
+     */
+    public Integer getEuId() {
+        return euId;
+    }
+
+    /**
+     * 设置考试人员ID
+     *
+     * @param euId 考试人员ID
+     */
+    public void setEuId(Integer euId) {
+        this.euId = euId;
+    }
+
+    /**
+     * 获取试卷ID
+     *
+     * @return examId - 试卷ID
+     */
+    public Integer getExamId() {
+        return examId;
+    }
+
+    /**
+     * 设置试卷ID
+     *
+     * @param examId 试卷ID
+     */
+    public void setExamId(Integer examId) {
+        this.examId = examId;
+    }
+
+    /**
+     * 获取参与党员
+     *
+     * @return userId - 参与党员
+     */
+    public String getUserId() {
+        return userId;
+    }
+
+    /**
+     * 设置参与党员
+     *
+     * @param userId 参与党员
+     */
+    public void setUserId(String userId) {
+        this.userId = userId == null ? null : userId.trim();
+    }
+
+    /**
+     * 获取考试得分
+     *
+     * @return score - 考试得分
+     */
+    public Integer getScore() {
+        return score;
+    }
+
+    /**
+     * 设置考试得分
+     *
+     * @param score 考试得分
+     */
+    public void setScore(Integer score) {
+        this.score = score;
+    }
+
+    /**
+     * 获取考试类型  0正考 1补考
+     *
+     * @return examType - 考试类型  0正考 1补考
+     */
+    public Integer getExamType() {
+        return examType;
+    }
+
+    /**
+     * 设置考试类型  0正考 1补考
+     *
+     * @param examType 考试类型  0正考 1补考
+     */
+    public void setExamType(Integer examType) {
+        this.examType = examType;
+    }
+
+    /**
+     * 获取状态  -1未提交 0未通过 1待判分 2已通过
+     *
+     * @return status - 状态  -1未提交 0未通过 1待判分 2已通过
+     */
+    public Integer getStatus() {
+        return status;
+    }
+
+    /**
+     * 设置状态  -1未提交 0未通过 1待判分 2已通过
+     *
+     * @param status 状态  -1未提交 0未通过 1待判分 2已通过
+     */
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    /**
+     * 获取提交时间
+     *
+     * @return finishTime - 提交时间
+     */
+    public Date getFinishTime() {
+        return finishTime;
+    }
+
+    /**
+     * 设置提交时间
+     *
+     * @param finishTime 提交时间
+     */
+    public void setFinishTime(Date finishTime) {
+        this.finishTime = finishTime;
+    }
+
+    /**
+     * 获取创建时间
+     *
+     * @return createTime - 创建时间
+     */
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    /**
+     * 设置创建时间
+     *
+     * @param createTime 创建时间
+     */
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+
+    @Override
+    public String toString() {
+        return "ExamUser [euId=" + euId + ", examId=" + examId + ", userId="
+                + userId + ", score=" + score + ", examType=" + examType
+                + ", status=" + status + ", finishTime=" + finishTime
+                + ", createTime=" + createTime + "]";
+    }
+    
+}

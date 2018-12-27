@@ -1,0 +1,87 @@
+# 共有8个级别，按照从低到高为：ALL < TRACE < DEBUG < INFO < WARN < ERROR < FATAL < OFF
+Configuration:
+    status: debug #log4j本身的打印日志的级别
+    monitorInterval: 600 #log4j自动重新配置的监测间隔时间，单位是s,最小是5s.
+
+    Properties: # 定义全局变量
+        Property: # 缺省配置（用于开发环境）。其他环境需要在VM参数中指定，如下：
+            - name: log.path
+              value: @project.basedir@/../dwmsres/log/@project.build.finalName@
+            - name: log.pattern
+              value: "%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%15.15t] %-30.30C{1.}.%-25.25M{1.}: %m%n"
+
+    Appenders:
+        Console:  #输出到控制台
+            name: CONSOLE
+            target: SYSTEM_OUT
+            PatternLayout:
+                pattern: ${log.pattern}
+        RollingFile: # 输出到文件，超过1024MB归档
+            - name: ACCESS_FILE
+              ignoreExceptions: false #默认为true，遇到异常时，会将事件追加到内部日志并忽略它。设置false时，异常会传递给调用者，当这个appender被FailoverAppender包裹时，必须设置为false
+              fileName: ${log.path}/access/access.log #要写入的文件的名称。如果文件或其父目录不存在，它们都将被创建出来
+              filePattern: "${log.path}/access/$${date:yyyy-MM}/access-%d{yyyy-MM-dd}-%i.log.gz" #压缩日志文件的文件名的模式，格式取决于所使用的RolloverPolicy
+              PatternLayout:
+                  pattern: ${log.pattern}
+              Policies:
+                  SizeBasedTriggeringPolicy: #按大小分，达到大小时调用RolloverStrategy
+                      size: 1024MB
+                  TimeBasedTriggeringPolicy: #按时间分类，取决于filePattern的%d的最小时间
+                      modulate: true
+                      interval: 1
+              DefaultRolloverStrategy:
+                  fileIndex: max #默认max，文件索引（编号）高的比低的更 新些。min则代表文件重命名将遵循Fixed Window策略
+                  min: 1
+                  max: 1000 #指定最多保存的文件个数，超过前面的将被删除
+                  compressionLevel: 9 #设置压缩级别0-9，其中0=无，1=最佳速度，通过9=最佳压缩。只适用于ZIP文件
+            - name: ERROR_FILE
+              ignoreExceptions: false #默认为true，遇到异常时，会将事件追加到内部日志并忽略它。设置false时，异常会传递给调用者，当这个appender被FailoverAppender包裹时，必须设置为false
+              fileName: ${log.path}/error/error.log #要写入的文件的名称。如果文件或其父目录不存在，它们都将被创建出来
+              filePattern: "${log.path}/error/$${date:yyyy-MM}/error-%d{yyyy-MM-dd}-%i.log.gz" #压缩日志文件的文件名的模式，格式取决于所使用的RolloverPolicy
+              PatternLayout:
+                  pattern: ${log.pattern}
+              Policies:
+                  SizeBasedTriggeringPolicy: #按大小分，达到大小时调用RolloverStrategy
+                      size: 1024MB
+                  TimeBasedTriggeringPolicy: #按时间分类，取决于filePattern的%d的最小时间
+                      modulate: true
+                      interval: 1
+              DefaultRolloverStrategy:
+                  fileIndex: max #默认max，文件索引（编号）高的比低的更 新些。min则代表文件重命名将遵循Fixed Window策略
+                  min: 1
+                  max: 1000 #指定最多保存的文件个数，超过前面的将被删除
+                  compressionLevel: 9 #设置压缩级别0-9，其中0=无，1=最佳速度，通过9=最佳压缩。只适用于ZIP文件
+            #druid的日志记录追加器
+            - name: DRUID_SQL_FILE
+              fileName: ${log.path}/druidsql/druid-sql.log
+              filePattern: "${log.path}/druidsql/$${date:yyyy-MM}/costtime-%d{yyyy-MM-dd}-%i.log.gz" #压缩日志文件的文件名的模式，格式取决于所使用的RolloverPolicy
+              PatternLayout:
+                  pattern: ${log.pattern}
+              Policies:
+                  SizeBasedTriggeringPolicy:
+                      size: 512MB
+
+    Loggers:
+        Root:
+            level: info
+            AppenderRef:
+                - ref: CONSOLE
+        Logger: #单独设置某些包的输出级别
+            - name: com.dwms
+              additivity: false #去除重复的log
+              level: debug
+              AppenderRef:
+                  - ref: ACCESS_FILE
+                  - ref: CONSOLE
+            - name: com.dwms
+              additivity: false #去除重复的log
+              level: error
+              AppenderRef:
+                  - ref: CONSOLE
+                  - ref: ERROR_FILE
+            - name: druid.sql
+              additivity: false
+              level: debug
+              appender-ref:
+                  - ref: CONSOLE
+                  - ref: DRUID_SQL_FILE

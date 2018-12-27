@@ -1,0 +1,144 @@
+package com.dwms.course.service.impl;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import tk.mybatis.mapper.entity.Example;
+import tk.mybatis.mapper.entity.Example.Criteria;
+
+import com.dwms.common.domain.Tree;
+import com.dwms.common.service.impl.BaseService;
+import com.dwms.common.util.TreeUtils;
+import com.dwms.course.dao.CourseChapterMapper;
+import com.dwms.course.domain.CourseCat;
+import com.dwms.course.domain.CourseChapter;
+import com.dwms.course.service.CourseChapterService;
+import com.dwms.system.domain.Party;
+import com.dwms.system.domain.SysUser;
+
+@Service("courseChapterService")
+@Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
+public class CourseChapterServiceImpl extends BaseService<CourseChapter> implements CourseChapterService {
+
+    private Logger log = LoggerFactory.getLogger(this.getClass());
+
+    @Autowired
+    private CourseChapterMapper courseChapterMapper;
+
+    @Override
+    public List<CourseChapter> findAll(CourseChapter chapter) {
+        try {
+            Example example = new Example(CourseChapter.class);
+            Criteria criteria = example.createCriteria();
+            if (null != chapter.getCourseId()) {
+                criteria.andCondition("courseId = ", chapter.getCourseId());
+            }
+            if (null != chapter.getChapterType()) {
+                criteria.andCondition("chapterType = ", chapter.getChapterType());
+            }
+            if (StringUtils.isNotBlank(chapter.getChapterTitle())) {
+                criteria.andCondition("chapterTitle like ", "%" + chapter.getChapterTitle() + "%");
+            }
+            example.setOrderByClause("chapterNo asc");
+            List<CourseChapter> list = this.selectByExample(example);
+            return list;
+        } catch (Exception e) {
+            log.error("获取党课章节列表失败", e);
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public Tree<CourseChapter> getChapterTree() {
+        List<Tree<CourseChapter>> trees = new ArrayList<>();
+        CourseChapter c = new CourseChapter();
+        c.setChapterType(CourseChapter.CHAPTER_TYPE_CHAPTER);//只获取章
+        List<CourseChapter> chapters = this.findAll(c);
+        chapters.forEach(chapter -> {
+            Tree<CourseChapter> tree = new Tree<>();
+            tree.setId(chapter.getChapterId().toString());
+            tree.setParentId(chapter.getParentId().toString());
+            tree.setText(chapter.getChapterTitle());
+            trees.add(tree);
+        });
+        return TreeUtils.build(trees);
+    }
+
+    @Override
+    @Transactional
+    public void addChapter(CourseChapter c) {
+        if (c.getChapterType() == CourseChapter.CHAPTER_TYPE_CHAPTER) {
+            c.setParentId(0);
+        }
+        this.save(c);
+        updateTimeLength(c.getCourseId());
+    }
+
+    @Override
+    @Transactional
+    public void updateChapter(CourseChapter c) {
+        if (c.getChapterType() == CourseChapter.CHAPTER_TYPE_CHAPTER) {
+            c.setParentId(0);
+        }
+        this.updateNotNull(c);
+        updateTimeLength(c.getCourseId());
+    }
+
+    @Override
+    @Transactional
+    public void deleteChapters(String ids) {
+        List<String> list = Arrays.asList(ids.split(","));
+        Integer courseId = null;
+        if (!list.isEmpty()) {
+            CourseChapter c = this.selectByKey(list.get(0));
+            courseId = c.getCourseId();
+        }
+        this.batchDelete(list, "chapterId", CourseChapter.class);
+        //章删掉了节也一起删掉
+        Example example = new Example(CourseChapter.class);
+        example.createCriteria().andIn("parentId", list);
+        this.courseChapterMapper.deleteByExample(example);
+        
+        if (null != courseId) {
+            updateTimeLength(courseId);
+        }
+    }
+    
+    /**
+     * 增删改后重新计算章的时长
+     * 
+     * @author PeiqiHuang
+     * @date 2018年12月6日 下午4:38:32
+     * @param courseId
+     */
+    private void updateTimeLength(Integer courseId) {
+        Example example = new Example(CourseChapter.class);
+        example.createCriteria().andCondition("courseId = ", courseId);
+        List<CourseChapter> chapters = this.courseChapterMapper.selectByExample(example);
+        List<CourseChapter> subs = null;
+        for (CourseChapter c : chapters) {
+            int timeLength = 0;
+            if (c.getChapterType() == CourseChapter.CHAPTER_TYPE_CHAPTER) {
+                example = new Example(CourseChapter.class);
+                example.createCriteria().andCondition("parentId = ", c.getChapterId());
+                subs = this.courseChapterMapper.selectByExample(example);
+                for (CourseChapter s : subs) {
+                    timeLength += s.getTimeLength();
+                }
+                if (c.getTimeLength() != timeLength && timeLength > 0) {//节升级为章时timeLength为0
+                    c.setTimeLength(timeLength);
+                    this.updateNotNull(c);
+                }
+            }
+        }
+    }
+}

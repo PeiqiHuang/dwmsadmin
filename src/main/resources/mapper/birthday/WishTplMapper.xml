@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dwms.birthday.dao.WishTplMapper">
+  <resultMap id="BaseResultMap" type="com.dwms.birthday.domain.WishTpl">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="tplId" jdbcType="INTEGER" property="tplId" />
+    <result column="partyId" jdbcType="INTEGER" property="partyId" />
+    <result column="wishText" jdbcType="VARCHAR" property="wishText" />
+    <result column="createTime" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+</mapper>

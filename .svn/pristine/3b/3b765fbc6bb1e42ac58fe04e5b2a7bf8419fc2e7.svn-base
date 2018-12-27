@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dwms.meeting.dao.MeetingMapper">
+  <resultMap id="BaseResultMap" type="com.dwms.meeting.domain.Meeting">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="mtgId" jdbcType="INTEGER" property="mtgId" />
+    <result column="partyId" jdbcType="INTEGER" property="partyId" />
+    <result column="mtgName" jdbcType="VARCHAR" property="mtgName" />
+    <result column="mtgTitle" jdbcType="VARCHAR" property="mtgTitle" />
+    <result column="mtgDesc" jdbcType="VARCHAR" property="mtgDesc" />
+    <result column="address" jdbcType="VARCHAR" property="address" />
+    <result column="remind" jdbcType="INTEGER" property="remind" />
+    <result column="signIn" jdbcType="INTEGER" property="signIn" />
+    <result column="pushMsg" jdbcType="INTEGER" property="pushMsg" />
+    <result column="recorder" jdbcType="VARCHAR" property="recorder" />
+    <result column="signer" jdbcType="VARCHAR" property="signer" />
+    <result column="signHelp" jdbcType="INTEGER" property="signHelp" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+    <result column="beginTime" jdbcType="TIMESTAMP" property="beginTime" />
+    <result column="endTime" jdbcType="TIMESTAMP" property="endTime" />
+    <result column="createTime" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+  
+  <select id="findById" resultType="meetingWithUser">
+  	select m.*, mu.userId from tb_meeting_info m 
+  	left join tb_meeting_user mu on m.mtgId=mu.mtgId
+	where m.mtgId = #{mtgId}
+  </select>
+</mapper>

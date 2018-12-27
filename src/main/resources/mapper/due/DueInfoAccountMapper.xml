@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dwms.due.dao.DueInfoAccountMapper">
+  <resultMap id="BaseResultMap" type="com.dwms.due.domain.DueInfoAccount">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="diaId" jdbcType="INTEGER" property="diaId" />
+    <result column="dueId" jdbcType="INTEGER" property="dueId" />
+    <result column="accId" jdbcType="INTEGER" property="accId" />
+    <result column="status" jdbcType="TINYINT" property="status" />
+    <result column="createTime" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+</mapper>

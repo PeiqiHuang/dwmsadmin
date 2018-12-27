@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dwms.meeting.dao.MtgUserMapper">
+  <resultMap id="BaseResultMap" type="com.dwms.meeting.domain.MtgUser">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="muId" jdbcType="INTEGER" property="muId" />
+    <result column="mtgId" jdbcType="INTEGER" property="mtgId" />
+    <result column="userId" jdbcType="VARCHAR" property="userId" />
+    <result column="signWay" jdbcType="TINYINT" property="signWay" />
+    <result column="offReason" jdbcType="VARCHAR" property="offReason" />
+    <result column="status" jdbcType="TINYINT" property="status" />
+    <!-- <result column="readSummary" jdbcType="TINYINT" property="readSummary" /> -->
+    <result column="signTime" jdbcType="TIMESTAMP" property="signTime" />
+    <result column="createTime" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+  
+  <select id="findAllByMtgId" resultType="mtgUser">
+  	select mu.*, u.userName from tb_meeting_user mu 
+  	left join tb_user_info u on mu.userId=u.userId
+	where mu.mtgId = #{mtgId}
+	<if test="userName != null and userName != ''">
+       	AND u.userName like concat('%',#{userName},'%') 
+    </if>
+	<if test="status != null">
+       	AND mu.status = #{status}
+    </if>
+	<if test="signWay != null and signWay != ''">
+       	AND mu.signWay = #{signWay}
+    </if>
+	<!-- <if test="readSummary != null and readSummary != ''">
+       	AND mu.readSummary = #{readSummary}
+    </if> -->
+    order by mu.status desc, signTime desc
+  </select>
+</mapper>

@@ -1,0 +1,160 @@
+$(function() {
+    initTable();
+    initPartySearch();
+});
+
+function initTable() {
+	var $tableForm = $(".entity-table-form");
+	var $party = $tableForm.find("select[name='partyId']");
+    var setting = {
+        url: ctx + 'exam/list',
+        pageSize: 10,
+        queryParams: function(params) {
+            return {
+                pageSize: params.limit,
+                pageNum: params.offset / params.limit + 1,
+                partyId: $party[0] == undefined ? '' : $party.val().trim(),
+                examName: $tableForm.find("input[name='examName']").val().trim(),
+                timeField: $tableForm.find("input[name='timeField']").val().trim(),
+                status: $tableForm.find("select[name='status']").val().trim(),
+            };
+        },
+        columns: [{
+	            checkbox: true
+	        },
+            /*{
+                title: '编号',
+                field: 'examId',
+                width: '50px'
+            },*/
+            {
+                title: '考试主题',
+                field: 'examName'
+            },
+            {
+            	title: '总分',
+            	field: 'totalScore'
+            },
+            {
+            	title: '及格分数',
+            	field: 'passScore'
+            },
+            {
+            	title: '总题数',
+            	field: 'quNum'
+            },
+            {
+            	title: '考试时长（分钟）',
+            	field: 'timeLength'
+            },
+            {
+            	title: '状态',
+            	field: 'status',
+                formatter: function (value, row, index) {
+                	if (value === -9) return '<span class="badge badge-danger">已删除</span>';
+                    if (value === -1) return '<span class="badge badge-danger">已取消</span>';
+                    if (value === 0) return '<span class="badge badge-warning">待发布</span>';
+                    if (value === 1) return '<span class="badge badge-success">已发布</span>';
+                }
+            },
+            {
+                title: '开始时间',
+                field: 'beginTime'
+            },
+            {
+                title: '结束时间',
+                field: 'endTime'
+            },
+            {
+            	title: '发布时间',
+            	field: 'releaseTime'
+            },
+            {
+                title: '创建时间',
+                field: 'createTime'
+            }
+        ]
+    };
+    $MB.initTable('entityTable', setting);
+    $MB.calenders('input[name="timeField"]', true, false);
+}
+
+function search() {
+	$MB.refreshTable('entityTable');
+}
+
+function refresh() {
+    $(".entity-table-form")[0].reset();
+    search();
+}
+
+function deleteEntity() {
+    var selected = $("#entityTable").bootstrapTable('getSelections');
+    var selected_length = selected.length;
+    if (!selected_length) {
+        $MB.n_warning('请勾选需要删除的考试！');
+        return;
+    }
+    var ids = "";
+    for (var i = 0; i < selected_length; i++) {
+        ids += selected[i].examId;
+        if (i !== (selected_length - 1)) ids += ",";
+    }
+    $MB.confirm({
+        text: "确定删除选中的考试？",
+        confirmButtonText: "确定删除"
+    }, function() {
+        $.post(ctx + 'exam/delete', { "ids": ids }, function(r) {
+            if (r.code === 0) {
+                $MB.n_success(r.msg);
+                refresh();
+            } else {
+                $MB.n_danger(r.msg);
+            }
+        });
+    });
+}
+
+function openExamQu() {
+	var selected = $("#entityTable").bootstrapTable('getSelections');
+    var selected_length = selected.length;
+    if (!selected_length || selected_length > 1) {
+        $MB.n_warning('请勾选一个考试！');
+        return;
+    }
+    var entityId = selected[0].examId;
+    var examName = selected[0].examName;
+	var url = "examQu?examId=" + entityId;
+	openPage(url, examName + "考试题目");
+}
+
+function openExamUser() {
+	var selected = $("#entityTable").bootstrapTable('getSelections');
+	var selected_length = selected.length;
+	if (!selected_length || selected_length > 1) {
+		$MB.n_warning('请勾选一个考试！');
+		return;
+	}
+	var entityId = selected[0].examId;
+	var examName = selected[0].examName;
+	var url = "examUser?examId=" + entityId;
+	openPage(url, examName + "考试统计");
+}
+
+function openQuUser() {
+	var selected = $("#entityTable").bootstrapTable('getSelections');
+	var selected_length = selected.length;
+	if (!selected_length || selected_length > 1) {
+		$MB.n_warning('请勾选一个考试！');
+		return;
+	}
+	var entityId = selected[0].examId;
+	var examName = selected[0].examName;
+	var url = "quUser?examId=" + entityId;
+	openPage(url, examName + "试题统计");
+}
+
+function openQu() {
+	var url = "question";
+	openPage(url, "考试题目");
+}

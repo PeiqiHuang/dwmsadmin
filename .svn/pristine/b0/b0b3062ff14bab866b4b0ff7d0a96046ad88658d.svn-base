@@ -1,0 +1,11 @@
+package com.dwms.meeting.dao;
+
+import java.util.List;
+
+import com.dwms.common.config.MyMapper;
+import com.dwms.meeting.domain.MtgUser;
+
+public interface MtgUserMapper extends MyMapper<MtgUser> {
+	
+	public List<MtgUser> findAllByMtgId(MtgUser mtgUser);
+}

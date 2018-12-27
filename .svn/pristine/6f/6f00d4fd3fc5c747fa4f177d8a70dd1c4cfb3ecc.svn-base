@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dwms.examine.dao.ExamQuMapper">
+  <resultMap id="BaseResultMap" type="com.dwms.examine.domain.ExamQu">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="eqId" jdbcType="INTEGER" property="eqId" />
+    <result column="examId" jdbcType="INTEGER" property="examId" />
+    <result column="quId" jdbcType="INTEGER" property="quId" />
+    <result column="quNo" jdbcType="INTEGER" property="quNo" />
+    <result column="score" jdbcType="INTEGER" property="score" />
+    <result column="createTime" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+  
+  <select id="findAllByExamId" resultType="examQuWithQu">
+    select eq.*, q.title, q.quType, q.answers, q.rightKey from tb_examine_question eq
+    left join tb_question_info q on eq.quId=q.quId
+    where eq.examId = #{examId}
+    <if test="quType != null">
+        AND q.quType = #{quType}
+    </if>
+    <if test="title != null and title != ''">
+        AND q.title = #{title}
+    </if>
+    <if test="answers != null and answers != ''">
+        AND q.answers like concat('%',#{answers},'%') 
+    </if>
+    <if test="rightKey != null and rightKey != ''">
+        AND q.rightKey like concat('%',#{rightKey},'%') 
+    </if>
+    order by eq.quNo asc
+  </select>
+  
+  <select id="findById" resultType="examQuWithQu">
+    select eq.*, q.title, q.quType, q.answers, q.rightKey from tb_examine_question eq
+    left join tb_question_info q on eq.quId=q.quId
+    where eq.eqId = #{eqId}
+    order by eq.quNo asc
+  </select>
+  
+  <select id="getTotalScore" resultType="java.lang.Integer">
+    select sum(score) from tb_examine_question 
+    where examId = #{examId}
+  </select>
+</mapper>

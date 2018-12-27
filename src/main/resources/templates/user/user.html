@@ -1,0 +1,133 @@
+<div class="card">
+    <div data-th-include="user/userAdd"></div>
+    <div class="card-block">
+        <div class="table-responsive">
+            <div id="data-table_wrapper" class="dataTables_wrapper">
+                <div class="dataTables_buttons hidden-sm-down actions">
+                    <span class="actions__item zmdi zmdi-search" onclick="search()" title="搜索" /> <span class="actions__item zmdi zmdi-refresh-alt" onclick="refresh()" title="刷新" />
+                    <div class="dropdown actions__item">
+                        <i data-toggle="dropdown" class="zmdi zmdi-download"> </i>
+                        <ul class="dropdown-menu dropdown-menu-right">
+                            <a href="javascript:void(0)" class="dropdown-item" data-table-action="excel" onclick="exportEntityExcel()">
+							Excel (.xlsx) </a>
+                            <a href="javascript:void(0)" class="dropdown-item" data-table-action="csv" onclick="exportEntityCsv()"> CSV
+							(.csv) </a>
+                        </ul>
+                    </div>
+                    <div class="dropdown actions__item" shiro:hasAnyPermissions="user:add,user:delete,user:update,user:reset">
+                        <i data-toggle="dropdown" class="zmdi zmdi-more-vert"></i>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <a href="javascript:void(0)" class="dropdown-item" data-toggle="modal" data-target="#entity-add" shiro:hasPermission="user:add">新增党员</a>
+                            <a href="javascript:void(0)" class="dropdown-item" onclick="updateEntity()" shiro:hasPermission="user:update">修改党员</a>
+                            <a href="javascript:void(0)" class="dropdown-item" onclick="batch()" shiro:hasPermission="user:add">批量上传</a>
+                            <a href="javascript:void(0)" class="dropdown-item" onclick="resetPwd()" shiro:hasPermission="user:reset">重置密码</a>
+                            <!-- <a href="javascript:void(0)" class="dropdown-item" onclick="deleteUsers()" shiro:hasPermission="user:delete">删除党员</a> -->
+                        </div>
+                    </div>
+                </div>
+                <div id="data-table_filter" class="dataTables_filter">
+                    <form class="entity-table-form">
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <div class="input-group">
+                                    <span class="input-group-addon"> 党员名称： </span>
+                                    <div class="form-group">
+                                        <input type="text" name="userName" class="form-control"> <i class="form-group__bar"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="input-group">
+                                    <span class="input-group-addon"> 手机： </span>
+                                    <div class="form-group">
+                                        <input type="text" name="mobile" class="form-control"> <i class="form-group__bar"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="input-group">
+                                    <span class="input-group-addon"> 性别： </span>
+                                    <div class="form-group">
+                                        <select class="form-control" name="gender">
+                                            <option value="" selected>所有</option>
+                                            <option value="0">未知</option>
+                                            <option value="1">男</option>
+                                            <option value="2">女</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="input-group">
+                                    <span class="input-group-addon"> 党员类型： </span>
+                                    <div class="form-group">
+                                        <select class="form-control" name="partyType">
+                                            <option value="" selected>所有</option>
+                                            <option value="1">申请入党人</option>
+                                            <option value="2">入党积极分子</option>
+                                            <option value="3">发展对象</option>
+                                            <option value="4">预备党员</option>
+                                            <option value="5">正式党员</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="input-group">
+                                    <span class="input-group-addon"> 党内职务： </span>
+                                    <div class="form-group">
+                                        <select class="form-control" name="partyPosts">
+                                            <option value="" selected>所有</option>
+                                            <option value="1">普通党员</option>
+                                            <option value="2">支部委员</option>
+                                            <option value="3">支部副书记</option>
+                                            <option value="4">支部书记</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="input-group">
+                                    <span class="input-group-addon"> 工作状态： </span>
+                                    <div class="form-group">
+                                        <select class="form-control" name="workStatus">
+                                            <option value="" selected>所有</option>
+                                            <option value="0">离职</option>
+                                            <option value="1">在岗</option>
+                                            <option value="2">在职</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="input-group">
+                                    <span class="input-group-addon"> 状态： </span>
+                                    <div class="form-group">
+                                        <select class="form-control" name="status">
+                                            <option value="" selected>所有</option>
+                                            <option value="1">正常</option>
+                                            <option value="0">禁用</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="party" class="col-sm-3" th:if="${isAdmin}">
+                                <div class="input-group">
+                                    <span class="input-group-addon"> 党支部： </span>
+                                    <div class="form-group">
+                                        <select class="form-control" name="partyId">
+                                            <option value="" selected>所有</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <table id="entityTable" data-mobile-responsive="true" class="mb-bootstrap-table text-nowrap"></table>
+            </div>
+        </div>
+    </div>
+</div>
+<script data-th-src="@{js/app/user/user.js}"></script>
+<script data-th-src="@{js/app/user/userEdit.js}"></script>

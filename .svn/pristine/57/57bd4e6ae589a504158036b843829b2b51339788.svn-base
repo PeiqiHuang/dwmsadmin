@@ -1,0 +1,316 @@
+package com.dwms.common.util;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.List;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+
+import org.apache.commons.collections.ListUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.dwms.common.config.FileConfig;
+import com.dwms.common.config.ImageConfig;
+import com.dwms.common.domain.ResponseBo;
+import com.google.common.collect.Lists;
+
+public class FileUtils {
+
+    private static Logger log = LoggerFactory.getLogger(FileUtils.class);
+
+    private static ImageConfig imageConfig = SpringUtils.getBean(ImageConfig.class);
+    
+    private static FileConfig fileConfig = SpringUtils.getBean(FileConfig.class);
+    
+    private FileUtils() {
+
+    }
+
+    /**
+     * 文件名加UUID
+     *
+     * @param filename 文件名
+     * @return UUID_文件名
+     */
+    private static String makeFileName(String filename) {
+        return UUIDUtils.generateUUID() + "_" + filename;
+    }
+
+    /**
+     * 文件名特殊字符过滤
+     *
+     * @param fileName 文件名
+     * @return 过滤后的文件名
+     * @throws PatternSyntaxException 正则异常
+     */
+    public static String stringFilter(String fileName) {
+        String regEx = "[`~!@#$%^&*+=|{}':; ',//[//]<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
+        Pattern p = Pattern.compile(regEx);
+        Matcher m = p.matcher(fileName);
+        return m.replaceAll("").trim();
+    }
+
+    /**
+     * 生成Excel文件
+     *
+     * @param filename 文件名称
+     * @param list     文件内容List
+     * @param clazz    List中的对象类型
+     * @return ResponseBo
+     */
+    public static ResponseBo createExcelByPOIKit(String filename, List<?> list, Class<?> clazz) {
+
+        if (list.isEmpty()) {
+            return ResponseBo.warn("导出数据为空！");
+        } else {
+            boolean operateSign = false;
+            String fileName = filename + ".xlsx";
+            fileName = makeFileName(fileName);
+            try {
+                File fileDir = new File("file");
+                if (!fileDir.exists())
+                    fileDir.mkdir();
+                String path = "file/" + fileName;
+                FileOutputStream fos;
+                fos = new FileOutputStream(path);
+                operateSign = ExcelUtils.builder(clazz)
+                        // 设置每个sheet的最大记录数,默认为10000,可不设置
+                        // .setMaxSheetRecords(10000)
+                        .toExcel(list, "查询结果", fos);
+            } catch (FileNotFoundException e) {
+                log.error("文件未找到", e);
+            }
+            if (operateSign) {
+                return ResponseBo.ok(fileName);
+            } else {
+                return ResponseBo.error("导出Excel失败，请联系网站管理员！");
+            }
+        }
+    }
+
+    /**
+     * 生成Csv文件
+     *
+     * @param filename 文件名称
+     * @param list     文件内容List
+     * @param clazz    List中的对象类型
+     * @return ResponseBo
+     */
+    public static ResponseBo createCsv(String filename, List<?> list, Class<?> clazz) {
+
+        if (list.isEmpty()) {
+            return ResponseBo.warn("导出数据为空！");
+        } else {
+            boolean operateSign;
+            String fileName = filename + ".csv";
+            fileName = makeFileName(fileName);
+
+            File fileDir = new File("file");
+            if (!fileDir.exists())
+                fileDir.mkdir();
+            String path = "file/" + fileName;
+            operateSign = ExcelUtils.builder(clazz)
+                    .toCsv(list, path);
+            if (operateSign) {
+                return ResponseBo.ok(fileName);
+            } else {
+                return ResponseBo.error("导出Csv失败，请联系网站管理员！");
+            }
+        }
+    }
+    
+    /** 
+	 *  根据内容上传
+	 */
+	public static String saveByString (String home, String fileContent, String fileName) {
+		File saveFile = new File(home + fileName);
+		if (!saveFile.getParentFile().exists()) {
+			saveFile.getParentFile().mkdirs();
+		}
+		OutputStream out = null;
+		InputStream is = null;
+		try {
+			if (!saveFile.exists()) {
+				saveFile.createNewFile();
+			}
+			out = new FileOutputStream(saveFile);
+			out.write(fileContent.getBytes("utf-8"));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (null != out) {
+				try {
+					out.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			if (null != is) {
+				try {
+					is.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return fileName;
+	}
+	
+	/**
+	 * 根据路径获取文件内容
+	 * 
+	 */
+	public static String getFile(String path) {
+		try {
+			//return IOUtils.readAll(new FileReader(path));
+			FileReader fr = new FileReader(path);
+			List<String> lines = IOUtils.readLines(fr);
+			fr.close();
+			return StringUtils.join(lines.toArray(), "");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	/**
+	 * 清空该路径目录
+	 * 
+	 */
+	public static boolean clearDir(String path) {
+		File dir = new File(path);
+		if (!dir.exists()) {
+			return false;
+		}
+		String[] content = dir.list();//取得当前目录下所有文件和文件夹
+		for(String name : content){
+			File temp = new File(path, name);
+			if(temp.isDirectory()){//判断是否是目录
+				clearDir(temp.getAbsolutePath());//递归调用，删除目录里的内容
+				temp.delete();//删除空目录
+			}else{
+				if(!temp.delete()){//直接删除文件
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	public static void saveFile(String path, MultipartFile mulFile, String fileName) throws IOException {
+		if (!path.endsWith("/")) {
+			path += "/";
+		}
+		File file = new File(path + fileName);
+		org.apache.commons.io.FileUtils.writeByteArrayToFile(file, mulFile.getBytes());
+	}
+	
+	public static String saveFile(String path, MultipartFile file) throws IOException {
+		String fileName = UUIDUtils.generateUUID() + "."
+                + FilenameUtils.getExtension(file.getOriginalFilename());
+		saveFile(path, file, fileName);
+		return fileName;
+	}
+	
+	/**
+	 * 保存一个实体上传的一张图片(一个实体只有一张图片)
+	 * 返回msg中存有图片保存路径
+	 * 
+	 * @author PeiqiHuang
+	 * @date 2018年12月4日 下午2:51:46
+	 * @param file
+	 * @param subPath
+	 * @return
+	 */
+	public static ResponseBo saveImg(MultipartFile file, String subPath) {
+		if (null != file && !file.isEmpty()) {
+    		String home = imageConfig.getUploadPath();
+        	String path = imageConfig.getRoot() + subPath + "/";
+    		try {
+    			FileUtils.clearDir(home + path);
+				String fileName = FileUtils.saveFile(home + path, file);
+				return ResponseBo.ok(path + fileName);
+			} catch (IOException e) {
+				e.printStackTrace();
+				return ResponseBo.error("保存图片失败！");
+			}
+    	}
+		return ResponseBo.error("图片为空！");
+	}
+	
+	/**
+     * 保存一个实体上传的附件(一个实体只有一个文件)
+     * 返回msg中存有附件保存路径
+     * 
+     * @author PeiqiHuang
+     * @date 2018年12月4日 下午2:51:46
+     * @param file
+     * @param subPath
+     * @return
+     */
+	public static ResponseBo saveFile(MultipartFile file, String subPath) {
+		if (null != file && !file.isEmpty()) {
+			String home = fileConfig.getUploadPath();
+			String path = fileConfig.getRoot() + subPath + "/";
+			try {
+				FileUtils.clearDir(home + path);
+				String fileName = FileUtils.saveFile(home + path, file);
+				return ResponseBo.ok(path + fileName);
+			} catch (IOException e) {
+				e.printStackTrace();
+				return ResponseBo.error("保存文件失败！");
+			}
+		}
+		return ResponseBo.error("文件为空！");
+	}
+	
+	public static ResponseBo saveFile(MultipartFile[] files, String subPath) {
+	    String home = fileConfig.getUploadPath();
+	    String path = fileConfig.getRoot() + subPath + "/";
+	    List<String> fileNames = Lists.newArrayList();
+	    if (null != files) {
+	        //clearDir(home + path);
+	        for (MultipartFile file : files) {
+	            if (null != file && !file.isEmpty()) {
+	                try {
+	                    String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();//用原来的名字
+                        FileUtils.saveFile(home + path, file, fileName);
+	                    fileNames.add(path + fileName);
+	                } catch (IOException e) {
+	                    e.printStackTrace();
+	                    return ResponseBo.error("保存文件失败！");
+	                }
+	            }
+            }
+	        return ResponseBo.ok(StringUtils.join(fileNames, ","));
+	    }
+	    return ResponseBo.error("文件为空！");
+	    
+	}
+
+    public static void delFiles(String[] delfileNames, String subPath) {
+        if (null == delfileNames) return;
+        File dir = new File(fileConfig.getUploadPath() + fileConfig.getRoot() + subPath);
+        if(dir.isDirectory()) {
+            File file = null;
+            for(String fileName : delfileNames) {
+                file = new File(dir.getAbsoluteFile() + "/" + fileName);
+                if (file.exists()) file.delete();
+            }
+        }
+    }
+}

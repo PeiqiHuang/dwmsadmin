@@ -1,0 +1,30 @@
+package com.dwms.meeting.domain.vo;
+
+import java.util.List;
+
+import com.dwms.meeting.domain.MtgSummary;
+
+public class MtgSumWithUser extends MtgSummary {
+
+	// 允许查看会议纪要党员
+	private String userId;
+	
+	private List<String> userIds;
+	
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+
+	public List<String> getUserIds() {
+		return userIds;
+	}
+
+	public void setUserIds(List<String> userIds) {
+		this.userIds = userIds;
+	}
+	
+}

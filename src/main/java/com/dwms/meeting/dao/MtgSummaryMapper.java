@@ -1,0 +1,14 @@
+package com.dwms.meeting.dao;
+
+import java.util.List;
+
+import com.dwms.common.config.MyMapper;
+import com.dwms.meeting.domain.MtgSummary;
+import com.dwms.meeting.domain.vo.MtgSumWithUser;
+
+public interface MtgSummaryMapper extends MyMapper<MtgSummary> {
+
+	List<MtgSummary> findAll(MtgSummary sum);
+	
+	List<MtgSumWithUser> findById(Integer sumId);
+}

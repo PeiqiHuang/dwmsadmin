@@ -1,0 +1,21 @@
+package com.dwms.album.service;
+
+import java.util.List;
+
+import com.dwms.album.domain.AlbumImg;
+import com.dwms.album.domain.AlbumImgForm;
+import com.dwms.common.domain.ResponseBo;
+import com.dwms.common.service.IService;
+
+public interface AlbumImgService extends IService<AlbumImg> {
+
+    List<AlbumImg> findImgs(AlbumImg ai);
+    
+    ResponseBo addImg(AlbumImg ai);
+    
+    ResponseBo deleteImgs(String ids);
+
+    ResponseBo move(AlbumImgForm form);
+
+    ResponseBo setCover(Integer aiId);
+}

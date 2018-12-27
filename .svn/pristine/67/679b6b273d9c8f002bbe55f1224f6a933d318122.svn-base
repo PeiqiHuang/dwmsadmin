@@ -1,0 +1,125 @@
+var validator;
+var $entityAddForm = $("#entity-add-form");
+
+//status控件
+var $status_label = $("#statusLabel");
+var $status_check = $("#statusCheck");
+var $status = $("input[name='status']");
+
+function setStatus(status) {
+	if (status || status == 1) {
+		$status_check.prop("checked", true);
+	    $status_label.html('正常');
+	}
+	if (!status || status == 0) {
+		$status_check.prop("checked", false);
+	    $status_label.html('禁用');
+	}
+	$status.val(status);
+}
+
+$(function () {
+    validateRule();
+    createPartyTree();
+    
+    $MB.calenders('input[name="probationaryTime"]', false, false);
+    $MB.calenders('input[name="fullTime"]', false, false);
+
+    $status_check.change(function () {
+        var checked = $(this).is(":checked");
+        var status = checked ? 1 : 0;
+        setStatus(status);
+    });
+    
+    $("#entity-add .btn-save").click(function () {
+    	var name = $(this).attr("name");
+        getParty();
+        validator = $entityAddForm.validate();
+        var flag = validator.form();
+        if (flag) {
+        	if (name === "save") {
+	            $.post(ctx + "user/add", $entityAddForm.serialize(), function (r) {
+	                if (r.code === 0) {
+	                    closeModal();
+	                    refresh();
+	                    $MB.n_success(r.msg);
+	                } else $MB.n_danger(r.msg);
+	            });
+        	}
+        	if (name === "update") {
+        		$.post(ctx + "user/update", $entityAddForm.serialize(), function (r) {
+        			if (r.code === 0) {
+        				closeModal();
+        				refresh();
+        				$MB.n_success(r.msg);
+        			} else $MB.n_danger(r.msg);
+        		});
+        	}
+        }
+    });
+
+    $("#entity-add .btn-close").click(function () {
+        closeModal();
+    });
+
+});
+
+function closeModal() {
+	$("#entity-add-button").attr("name", "save");
+    setStatus(1);
+    $("#entity-add-modal-title").html('新增党员');
+    validator.resetForm();
+    $MB.closeAndRestModal("entity-add");
+    refreshPartyTree();
+}
+
+function validateRule() {
+    var icon = "<i class='zmdi zmdi-close-circle zmdi-hc-fw'></i> ";
+    validator = $entityAddForm.validate({
+        rules: {
+            userName: {
+                required: true,
+                maxlength: 100
+            },
+            mobile: {
+            	required: true,
+                checkPhone: true
+            },
+            gender: {
+            	required: true
+            },
+            partyType: {
+            	required: true
+            },
+            workStatus: {
+            	required: true
+            },
+            status: {
+            	required: true
+            },partyId: {
+            	required: true
+            }
+        },
+        errorPlacement: function (error, element) {
+            if (element.is(":checkbox") || element.is(":radio")) {
+                error.appendTo(element.parent().parent());
+            } else {
+                error.insertAfter(element);
+            }
+        },
+        messages: {
+        	userName: {
+                required: icon + "请输入党员名称",
+                maxlength: icon + "党员名称长度少于100个字符"
+            },
+            mobile: {
+            	required: icon + "请输入手机"
+            },
+        	gender: icon + "请选择性别",
+        	partyType: icon + "请选择党员类型",
+        	workStatus: icon + "请选择工作状态",
+        	partyId: icon + "请选择党支部",
+        	
+        }
+    });
+}

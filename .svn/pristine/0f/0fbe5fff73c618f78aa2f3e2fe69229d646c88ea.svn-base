@@ -1,0 +1,61 @@
+function addEntity() {
+	ajaxGetVals();
+	$('#entity-add').modal();
+}
+function updateEntity() {
+	var selected = $("#entityTable").bootstrapTable('getSelections');
+    var selected_length = selected.length;
+    if (!selected_length) {
+        $MB.n_warning('请勾选需要修改的党课！');
+        return;
+    }
+    if (selected_length > 1) {
+        $MB.n_warning('一次只能修改一个党课！');
+        return;
+    }
+    var entityId = selected[0].courseId;
+    $.post(ctx + "course/getCourse", {"courseId": entityId}, function (r) {
+        if (r.code === 0) {
+        	$("#entity-add-modal-title").html('修改党课');
+        	$("#entity-add-button").attr("name", "update");
+            var $form = $('#entity-add');
+            var entity = r.msg;
+            showModal($form, entity);
+            //已发布的党课不能编辑
+            //if (entity.progress > 0 && entity.status == 1) $("#entity-add-button").prop("hidden", true);
+        } else {
+            $MB.n_danger(r.msg);
+        }
+    });
+}
+
+function showModal($form, entity) {
+	$form.modal();
+    $form.find("input[name='courseId']").val(entity.courseId);
+    $form.find("input[name='partyId']").val(entity.partyId);
+    $form.find("input[name='courseName']").val(entity.courseName);
+    $form.find("input[name='courseDesc']").val(entity.courseDesc);
+    $form.find("input[name='chapterNum']").val(entity.chapterNum);
+    $("input:radio[name='status'][value='" + entity.status + "']").prop("checked", true);
+    $form.find("input[name='endTime']").val(entity.endTime);
+    setCourseType(entity.courseType);
+    //分类联动设值,当分类select ajax获取之后自动设值为selected
+    catAddSelect.selected = entity.categoryId;
+    //参会党员
+    usersSelect.selected = entity.userIds;
+    
+    if (!isAdmin) { // 超管时select_node.jstree事件设置值
+    	ajaxGetVals(entity.partyId);
+    }
+    
+    // 设值party会自动触发select_node.jstree事件
+    partyTreeSelect(entity.partyId);
+    
+    //封面
+    $("#coverImg").attr("src", entity.cover);
+    //上传文件
+    $("#courseFile").attr("href", entity.filePath);
+    if (!!entity.filePath) {
+    	$("#courseFile").text(entity.courseName);
+    }
+}

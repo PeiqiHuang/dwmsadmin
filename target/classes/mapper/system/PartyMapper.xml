@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dwms.system.dao.PartyMapper">
+  <resultMap id="BaseResultMap" type="com.dwms.system.domain.Party">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="partyId" jdbcType="INTEGER" property="partyId" />
+    <result column="partyName" jdbcType="VARCHAR" property="partyName" />
+    <result column="parentId" jdbcType="INTEGER" property="parentId" />
+    <result column="address" jdbcType="VARCHAR" property="address" />
+    <result column="contract" jdbcType="VARCHAR" property="contract" />
+    <result column="mobile" jdbcType="VARCHAR" property="mobile" />
+    <result column="email" jdbcType="VARCHAR" property="email" />
+    <result column="source" jdbcType="TINYINT" property="source" />
+    <result column="status" jdbcType="TINYINT" property="status" />
+    <result column="createTime" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+</mapper>

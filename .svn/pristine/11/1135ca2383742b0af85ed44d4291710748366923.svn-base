@@ -1,0 +1,8 @@
+#图片设置
+image:
+    uploadpath: /home/cpapptest/tomcat_dwms_12306/webapps/dwmsres #上传路径
+    accesspath: http://118.178.185.211:12306/dwmsres #访问路径
+    types: jpeg,jpg,png,gif,bmp #常见图片类型
+
+    user:
+      avatar: /image/user/avatar #用户头像地址

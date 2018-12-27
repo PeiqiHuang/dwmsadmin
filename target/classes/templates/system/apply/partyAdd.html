@@ -1,0 +1,93 @@
+<div class="modal fade" id="entity-add" data-keyboard="false" data-backdrop="static" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title pull-left" id="entity-add-modal-title">新增党支部</h3>
+            </div>
+            <div class="modal-body">
+                <form id="entity-add-form">
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="input-group">
+                                <span class="input-group-addon">
+									党支部名称：
+					            </span>
+                                <div class="form-group">
+                                    <input type="text" name="partyName" class="form-control">
+                                    <input type="text" name="applyId" hidden class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="input-group">
+                                <span class="input-group-addon">
+					               	所在地址：
+					            </span>
+                                <div class="form-group">
+                                    <input type="text" name="address" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="input-group">
+                                <span class="input-group-addon">
+					               	联系人：
+					            </span>
+                                <div class="form-group">
+                                    <input type="text" name="contract" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="input-group">
+                                <span class="input-group-addon">
+					               	联系电话：
+					            </span>
+                                <div class="form-group">
+                                    <input type="text" name="mobile" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="input-group">
+                                <span class="input-group-addon">
+					               	邮箱：
+					            </span>
+                                <div class="form-group">
+                                    <input type="text" name="email" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="input-group">
+                                <span class="input-group-addon" style="justify-content: flex-start;margin-top: .5rem;">
+					               	上级党支部：
+					             </span>
+                                <div class="form-group">
+                                    <div id="entityTree"></div>
+                                </div>
+                                <input type="hidden" name="parentId">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-save" id="entity-add-button" name="save">创建</button>
+                <button type="button" class="btn btn-secondary btn-close">关闭</button>
+                <button class="btn-hide"></button>
+            </div>
+        </div>
+    </div>
+</div>
+<script data-th-src="@{js/app/system/apply/partyAdd.js}"></script>

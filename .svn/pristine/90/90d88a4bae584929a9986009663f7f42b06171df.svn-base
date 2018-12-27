@@ -1,0 +1,47 @@
+package com.dwms.due.service.impl;
+
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.dwms.common.domain.ResponseBo;
+import com.dwms.common.service.impl.BaseService;
+import com.dwms.common.util.PathUtils;
+import com.dwms.due.dao.DueUserMapper;
+import com.dwms.due.domain.DueUser;
+import com.dwms.due.service.DueUserService;
+
+@Service("dueUserService")
+@Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
+public class DueUserServiceImpl extends BaseService<DueUser> implements DueUserService {
+
+    private Logger log = LoggerFactory.getLogger(this.getClass());
+
+    @Autowired
+    private DueUserMapper dueUserMapper;
+    
+    @Override
+    public List<DueUser> findAllByDueId(DueUser dueUser) {
+        List<DueUser> list = dueUserMapper.findAllByDueId(dueUser);
+        PathUtils.setImgAccessPath(list, "imgPath");
+        return list;
+    }
+
+    @Override
+    public ResponseBo confirm(Integer duId) {
+        DueUser dueUser = this.selectByKey(duId);
+        if (dueUser.getStatus() != DueUser.STATUS_YES) {
+            return ResponseBo.error("不能确认缴费，缴费状态不是已缴费！");
+        }
+        dueUser.setStatus(DueUser.STATUS_CONFIRM);
+        this.updateNotNull(dueUser);
+        return ResponseBo.ok("确认缴费成功！");
+    }
+
+
+}

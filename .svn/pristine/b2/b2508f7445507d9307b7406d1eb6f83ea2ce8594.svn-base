@@ -1,0 +1,20 @@
+package com.dwms.examine.dao;
+
+import java.util.List;
+
+import com.dwms.common.config.MyMapper;
+import com.dwms.examine.domain.ExamQu;
+import com.dwms.examine.domain.form.ExamQuDataForm;
+import com.dwms.examine.domain.form.ExamQuForm;
+import com.dwms.examine.domain.vo.ExamQuWithData;
+import com.dwms.examine.domain.vo.ExamQuWithQu;
+
+public interface ExamQuMapper extends MyMapper<ExamQu> {
+    
+    List<ExamQuWithQu> findAllByExamId(ExamQuForm qu);
+    
+    ExamQuWithQu findById(Integer eqId);
+    
+    int getTotalScore(Integer examId);//获取试题相加分数
+
+}

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dwms.album.dao.AlbumMapper">
+  <resultMap id="BaseResultMap" type="com.dwms.album.domain.Album">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="albumId" jdbcType="INTEGER" property="albumId" />
+    <result column="partyId" jdbcType="INTEGER" property="partyId" />
+    <result column="albumName" jdbcType="VARCHAR" property="albumName" />
+    <result column="albumDesc" jdbcType="VARCHAR" property="albumDesc" />
+    <result column="cover" jdbcType="VARCHAR" property="cover" />
+    <result column="status" jdbcType="TINYINT" property="status" />
+    <result column="releaseTime" jdbcType="TIMESTAMP" property="releaseTime" />
+    <result column="createTime" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+</mapper>

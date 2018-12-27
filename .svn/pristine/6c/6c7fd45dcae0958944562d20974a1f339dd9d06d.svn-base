@@ -1,0 +1,207 @@
+package com.dwms.meeting.domain;
+
+import java.util.Date;
+import javax.persistence.*;
+
+@Table(name = "tb_meeting_user")
+public class MtgUser {
+	/**
+	 * 状态
+	 */
+	public static final Integer STATUS_SIGN = 1;
+	public static final Integer STATUS_NOT_SIGN = 0;
+    /**
+     * 逻辑ID
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer muId;
+
+    /**
+     * 会议ID
+     */
+    private Integer mtgId;
+
+    /**
+     * 会议参与党员
+     */
+    private String userId;
+
+    /**
+     * 签到方式 1自签（扫码） 1代签 2补签
+     */
+    private Integer signWay;
+
+    /**
+     * 状态 0未签到 1已签到
+     */
+    private Integer status;
+
+    /**
+     * 是否可以查看会议纪要 1是 0否
+     */
+    private Integer readSummary;
+
+    /**
+     * 签到时间
+     */
+    private Date signTime;
+
+    /**
+     * 创建时间
+     */
+    private Date createTime;
+
+    /**
+     * 获取逻辑ID
+     *
+     * @return muId - 逻辑ID
+     */
+    public Integer getMuId() {
+        return muId;
+    }
+
+    /**
+     * 设置逻辑ID
+     *
+     * @param muId 逻辑ID
+     */
+    public void setMuId(Integer muId) {
+        this.muId = muId;
+    }
+
+    /**
+     * 获取会议ID
+     *
+     * @return meetingId - 会议ID
+     */
+    public Integer getMtgId() {
+        return mtgId;
+    }
+
+    /**
+     * 设置会议ID
+     *
+     * @param meetingId 会议ID
+     */
+    public void setMtgId(Integer mtgId) {
+        this.mtgId = mtgId;
+    }
+
+    /**
+     * 获取会议参与党员
+     *
+     * @return userId - 会议参与党员
+     */
+    public String getUserId() {
+        return userId;
+    }
+
+    /**
+     * 设置会议参与党员
+     *
+     * @param userId 会议参与党员
+     */
+    public void setUserId(String userId) {
+        this.userId = userId == null ? null : userId.trim();
+    }
+
+    /**
+     * 获取签到方式 1自签（扫码） 1代签 2补签
+     *
+     * @return signWay - 签到方式 1自签（扫码） 1代签 2补签
+     */
+    public Integer getSignWay() {
+        return signWay;
+    }
+
+    /**
+     * 设置签到方式 1自签（扫码） 1代签 2补签
+     *
+     * @param signWay 签到方式 1自签（扫码） 1代签 2补签
+     */
+    public void setSignWay(Integer signWay) {
+        this.signWay = signWay;
+    }
+
+    /**
+     * 获取状态 0未签到 1已签到
+     *
+     * @return status - 状态 0未签到 1已签到
+     */
+    public Integer getStatus() {
+        return status;
+    }
+
+    /**
+     * 设置状态 0未签到 1已签到
+     *
+     * @param status 状态 0未签到 1已签到
+     */
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    /**
+     * 获取是否可以查看会议纪要 1是 0否
+     *
+     * @return readSummary - 是否可以查看会议纪要 1是 0否
+     */
+    public Integer getReadSummary() {
+        return readSummary;
+    }
+
+    /**
+     * 设置是否可以查看会议纪要 1是 0否
+     *
+     * @param readSummary 是否可以查看会议纪要 1是 0否
+     */
+    public void setReadSummary(Integer readSummary) {
+        this.readSummary = readSummary;
+    }
+
+    /**
+     * 获取签到时间
+     *
+     * @return signTime - 签到时间
+     */
+    public Date getSignTime() {
+        return signTime;
+    }
+
+    /**
+     * 设置签到时间
+     *
+     * @param signTime 签到时间
+     */
+    public void setSignTime(Date signTime) {
+        this.signTime = signTime;
+    }
+
+    /**
+     * 获取创建时间
+     *
+     * @return createTime - 创建时间
+     */
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    /**
+     * 设置创建时间
+     *
+     * @param createTime 创建时间
+     */
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+
+	@Override
+	public String toString() {
+		return "MtgUser [muId=" + muId + ", mtgId=" + mtgId
+				+ ", userId=" + userId + ", signWay=" + signWay + ", status="
+				+ status + ", readSummary=" + readSummary + ", signTime="
+				+ signTime + ", createTime=" + createTime + "]";
+	}
+    
+}

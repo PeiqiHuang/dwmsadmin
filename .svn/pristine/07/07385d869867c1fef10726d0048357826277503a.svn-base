@@ -1,0 +1,33 @@
+<div class="modal fade" id="entity-add" data-keyboard="false" data-backdrop="static" ><!-- tabindex="-1" 去掉，否则日期控件不能选择年月下拉 -->
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title pull-left" id="entity-add-modal-title">新增图片</h3>
+            </div>
+            <div class="modal-body">
+                <form id="entity-add-form" enctype="multipart/form-data">
+                    <input type="text" hidden name="albumId" th:value="${albumId}" />
+                    <input type="text" hidden id="albumName" th:value="${albumName}" />
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="input-group">
+                                <span class="input-group-addon">
+					               	 上传新图片（可多选）：
+					            </span>
+                                <div class="form-group">
+                                    <input name="imgs" type="file" multiple >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-save" id="entity-add-button" name="save">上传</button>
+                <button type="button" class="btn btn-secondary btn-close">关闭</button>
+                <button class="btn-hide"></button>
+            </div>
+        </div>
+    </div>
+</div>
+<script data-th-src="@{js/app/album/img/imgAdd.js}"></script>

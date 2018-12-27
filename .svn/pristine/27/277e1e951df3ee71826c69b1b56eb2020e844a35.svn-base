@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dwms.due.dao.DueUserMapper">
+  <resultMap id="BaseResultMap" type="com.dwms.due.domain.DueUser">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="duId" jdbcType="INTEGER" property="duId" />
+    <result column="dueId" jdbcType="INTEGER" property="dueId" />
+    <result column="userId" jdbcType="VARCHAR" property="userId" />
+    <result column="due" jdbcType="INTEGER" property="due" />
+    <result column="payWay" jdbcType="TINYINT" property="payWay" />
+    <result column="status" jdbcType="TINYINT" property="status" />
+    <result column="imgPath" jdbcType="VARCHAR" property="imgPath" />
+    <result column="createTime" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+  
+  <select id="findAllByDueId" resultType="dueUser">
+    select du.*, u.userName from tb_due_user du 
+    left join tb_user_info u on du.userId=u.userId
+    where du.dueId = #{dueId}
+    <if test="userName != null and userName != ''">
+        AND u.userName like concat('%',#{userName},'%') 
+    </if>
+    <if test="payWay != null">
+        AND du.payWay = #{payWay}
+    </if>
+    <if test="status != null">
+        AND du.status = #{status}
+    </if>
+    order by du.status desc, du.dueTime desc, du.createTime desc
+  </select>
+</mapper>

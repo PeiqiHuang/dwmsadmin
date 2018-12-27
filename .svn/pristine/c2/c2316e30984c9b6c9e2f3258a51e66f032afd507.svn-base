@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dwms.examine.dao.ExamUserMapper">
+  <resultMap id="BaseResultMap" type="com.dwms.examine.domain.ExamUser">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="euId" jdbcType="INTEGER" property="euId" />
+    <result column="examId" jdbcType="INTEGER" property="examId" />
+    <result column="userId" jdbcType="VARCHAR" property="userId" />
+    <result column="score" jdbcType="INTEGER" property="score" />
+    <result column="examType" jdbcType="TINYINT" property="examType" />
+    <result column="status" jdbcType="TINYINT" property="status" />
+    <result column="finishTime" jdbcType="TIMESTAMP" property="finishTime" />
+    <result column="createTime" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+  
+  <select id="findAllByExamId" resultType="examUser">
+    select eu.*, u.userName from tb_examine_user eu 
+    left join tb_user_info u on eu.userId=u.userId
+    where eu.examId = #{examId}
+    <if test="userName != null and userName != ''">
+        AND u.userName like concat('%',#{userName},'%') 
+    </if>
+    <if test="examType != null">
+        AND eu.examType = #{examType}
+    </if>
+    <if test="status != null">
+        AND eu.status = #{status}
+    </if>
+    order by eu.status desc, score desc
+  </select>
+</mapper>

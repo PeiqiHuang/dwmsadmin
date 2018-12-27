@@ -1,0 +1,243 @@
+var validator;
+var $entityAddForm = $("#entity-add-form");
+
+//开关控件
+var $remind_label = $("#remindLabel");
+var $remind_check = $("#remindCheck");
+var $remind = $("input[name='remind']");
+var $signIn_label = $("#signInLabel");
+var $signIn_check = $("#signInCheck");
+var $signIn = $("input[name='signIn']");
+var $pushMsg_label = $("#pushMsgLabel");
+var $pushMsg_check = $("#pushMsgCheck");
+var $pushMsg = $("input[name='pushMsg']");
+var $signHelp_label = $("#signHelpLabel");
+var $signHelp_check = $("#signHelpCheck");
+var $signHelp = $("input[name='signHelp']");
+//党员多选
+var $usersSelect = $entityAddForm.find("select[name='usersSelect']");
+var $users = $entityAddForm.find("input[name='users']");
+
+function setSignHelp(signHelp) {
+	if (signHelp || signHelp == 1) {
+		$signHelp_check.prop("checked", true);
+	    $signHelp_label.html('允许');
+	}
+	if (!signHelp || signHelp == 0) {
+		$signHelp_check.prop("checked", false);
+	    $signHelp_label.html('禁止');
+	}
+	$signHelp.val(signHelp);
+}
+function setPushMsg(pushMsg) {
+	if (pushMsg || pushMsg == 1) {
+		$pushMsg_check.prop("checked", true);
+	    $pushMsg_label.html('是');
+	}
+	if (!pushMsg || pushMsg == 0) {
+		$pushMsg_check.prop("checked", false);
+	    $pushMsg_label.html('否');
+	}
+	$pushMsg.val(pushMsg);
+}
+function setSignIn(signIn) {
+	if (signIn || signIn == 1) {
+		$signIn_check.prop("checked", true);
+	    $signIn_label.html('是');
+	}
+	if (!signIn || signIn == 0) {
+		$signIn_check.prop("checked", false);
+	    $signIn_label.html('否');
+	}
+	$signIn.val(signIn);
+}
+function setRemind(remind) {
+	if (remind || remind == 1) {
+		$remind_check.prop("checked", true);
+	    $remind_label.html('是');
+	}
+	if (!remind || remind == 0) {
+		$remind_check.prop("checked", false);
+	    $remind_label.html('否');
+	}
+	$remind.val(remind);
+}
+
+function setUsers() {
+	$usersSelect.multipleSelect('setSelects', []);
+    $usersSelect.multipleSelect("refresh");
+}
+
+$(function () {
+    validateRule();
+    createPartyTree();
+    createUserSelect(["signer", "recorder"]);
+    initUser();
+    
+    $MB.calenders('input[name="beginTime"]', false, true);
+    $MB.calenders('input[name="endTime"]', false, true);
+
+	$remind_check.change(function () {
+        var checked = $(this).is(":checked");
+        var remind = checked ? 1 : 0;
+        setRemind(remind);
+    });
+	$signIn_check.change(function () {
+        var checked = $(this).is(":checked");
+        var signIn = checked ? 1 : 0;
+        setSignIn(signIn);
+    });
+	$pushMsg_check.change(function () {
+        var checked = $(this).is(":checked");
+        var pushMsg = checked ? 1 : 0;
+        setPushMsg(pushMsg);
+    });
+	$signHelp_check.change(function () {
+        var checked = $(this).is(":checked");
+        var signHelp = checked ? 1 : 0;
+        setSignHelp(signHelp);
+    });
+    
+    $("#entity-add .btn-save").click(function () {
+    	var name = $(this).attr("name");
+        getParty();
+        validator = $entityAddForm.validate();
+        var flag = validator.form();
+        if (flag) {
+        	if (name === "save") {
+	            $.post(ctx + "meeting/add", $entityAddForm.serialize(), function (r) {
+	                if (r.code === 0) {
+	                    closeModal();
+	                    refresh();
+	                    $MB.n_success(r.msg);
+	                } else $MB.n_danger(r.msg);
+	            });
+        	}
+        	if (name === "update") {
+        		$.post(ctx + "meeting/update", $entityAddForm.serialize(), function (r) {
+        			if (r.code === 0) {
+        				closeModal();
+        				refresh();
+        				$MB.n_success(r.msg);
+        			} else $MB.n_danger(r.msg);
+        		});
+        	}
+        }
+    });
+
+    $("#entity-add .btn-close").click(function () {
+        closeModal();
+    });
+
+});
+
+function closeModal() {
+	$("#entity-add-button").attr("name", "save");
+	setRemind(1);
+	setPushMsg(1);
+	setSignIn(1);
+	setSignHelp(1);
+	setUsers();
+    $("#entity-add-modal-title").html('新增会议');
+    validator.resetForm();
+    $MB.closeAndRestModal("entity-add");
+    refreshPartyTree();
+}
+
+function initUser() {
+    $.post(ctx + "user/getUsers", {}, function (r) {
+        var data = r.msg;
+        console.info(data)
+        var option = "";
+        for (var i = 0; i < data.length; i++) {
+            option += "<option value='" + data[i].userId + "'>" + data[i].userName + "</option>"
+        }
+        $usersSelect.html("").append(option);
+        var options = {
+            selectAllText: '所有党员',
+            allSelected: '所有党员',
+            width: '100%',
+            onClose: function () {
+                $users.val($usersSelect.val());
+                validator.element("input[name='users']");
+            }
+        };
+
+        $usersSelect.multipleSelect(options);
+    });
+}
+
+function validateRule() {
+    var icon = "<i class='zmdi zmdi-close-circle zmdi-hc-fw'></i> ";
+    validator = $entityAddForm.validate({
+        rules: {
+        	mtgName: {
+                required: true,
+                maxlength: 200
+            },
+            mtgTitle: {
+            	//required: true,
+            	maxlength: 200
+            },
+            mtgDesc: {
+            	maxlength: 500
+            },
+            address: {
+            	required: true,
+            	maxlength: 200
+            },
+            recorder: {
+            	required: true
+            },
+            signer: {
+            	required: true
+            },
+            users: {
+            	required: true
+            },
+            beginTime: {
+            	required: true
+            },
+            endTime: {
+            	required: true
+            },
+            status: {
+            	required: true
+            },partyId: {
+            	required: true
+            }
+        },
+        errorPlacement: function (error, element) {
+            if (element.is(":checkbox") || element.is(":radio")) {
+                error.appendTo(element.parent().parent());
+            } else {
+                error.insertAfter(element);
+            }
+        },
+        messages: {
+        	mtgName: {
+                required: icon + "请输入会议主题",
+                maxlength: icon + "会议主题长度少于200个字符"
+            },
+            mtgTitle: {
+            	//required: icon + "请输入会议议题",
+            	maxlength: icon + "会议议题长度少于200个字符"
+            },
+            mtgDesc: {
+            	maxlength: icon + "会议要求长度少于500个字符"
+            },
+            address: {
+            	required: icon + "请输入会议地点",
+            	maxlength: icon + "地址长度少于200个字符"
+            },
+        	beginTime: icon + "请选择开始时间",
+        	endTime: icon + "请选择结束时间",
+        	recorder: icon + "请选择记录人",
+        	users: icon + "请选择参会党员",
+        	signer: icon + "请选择签到负责人",
+        	status: icon + "请选择会议状态",
+        	partyId: icon + "请选择党支部",
+        	
+        }
+    });
+}

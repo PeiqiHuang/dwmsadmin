@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dwms.examine.dao.QuestionMapper">
+  <resultMap id="BaseResultMap" type="com.dwms.examine.domain.Question">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="quId" jdbcType="INTEGER" property="quId" />
+    <result column="partyId" jdbcType="INTEGER" property="partyId" />
+    <result column="title" jdbcType="VARCHAR" property="title" />
+    <result column="quType" jdbcType="TINYINT" property="quType" />
+    <result column="answers" jdbcType="VARCHAR" property="answers" />
+    <result column="rightKey" jdbcType="VARCHAR" property="rightKey" />
+    <result column="analysis" jdbcType="VARCHAR" property="analysis" />
+    <result column="status" jdbcType="TINYINT" property="status" />
+    <result column="createTime" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+</mapper>

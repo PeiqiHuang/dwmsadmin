@@ -1,0 +1,84 @@
+<div class="card">
+    <div data-th-include="examine/question/questionAdd"></div>
+    <div class="card-block">
+        <div class="table-responsive">
+            <div id="data-table_wrapper" class="dataTables_wrapper">
+                <div class="dataTables_buttons hidden-sm-down actions">
+                    <span class="actions__item zmdi zmdi-search" onclick="search()" title="搜索" /> <span class="actions__item zmdi zmdi-refresh-alt" onclick="refresh()" title="刷新" />
+                    <div class="dropdown actions__item" shiro:hasAnyPermissions="question:add,question:delete,question:update">
+                        <i data-toggle="dropdown" class="zmdi zmdi-more-vert"></i>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <a href="javascript:void(0)" class="dropdown-item" onclick="addEntity()" shiro:hasPermission="question:add">新增题目</a>
+                            <a href="javascript:void(0)" class="dropdown-item" onclick="updateEntity()" shiro:hasPermission="question:update">修改题目</a>
+                            <a href="javascript:void(0)" class="dropdown-item" onclick="deleteEntity()" shiro:hasPermission="question:delete">删除题目</a>
+                        </div>
+                    </div>
+                </div>
+                <div id="data-table_filter" class="dataTables_filter">
+                    <form class="entity-table-form">
+                        <div class="row">
+                        	<div class="col-sm-3">
+                                <div class="input-group">
+                                    <span class="input-group-addon">
+					               	创建时间：
+					            </span>
+                                    <div class="form-group">
+                                        <input type="text" name="timeField" class="form-control">
+                                        <i class="form-group__bar"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="input-group">
+                                    <span class="input-group-addon"> 题目标题： </span>
+                                    <div class="form-group">
+                                        <input type="text" name="title" class="form-control"> <i class="form-group__bar"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="input-group">
+                                    <span class="input-group-addon"> 状态： </span>
+                                    <div class="form-group">
+                                        <select class="form-control" name="status">
+                                            <option value="" selected>所有</option>
+                                            <option value="1">有效</option>
+                                            <option value="0">禁用</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="input-group">
+                                    <span class="input-group-addon"> 题目类型： </span>
+                                    <div class="form-group">
+                                        <select class="form-control" name="quType">
+                                            <option value="" selected>所有</option>
+                                            <option value="1">单选题</option>
+                                            <option value="2">多选题</option>
+                                            <option value="3">填空题</option>
+                                            <option value="4">简答题</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="party" class="col-sm-3" th:if="${isAdmin}">
+                                <div class="input-group">
+                                    <span class="input-group-addon"> 党支部： </span>
+                                    <div class="form-group">
+                                        <select class="form-control" name="partyId">
+                                            <option value="" selected>所有</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <table id="entityTable" data-mobile-responsive="true" class="mb-bootstrap-table text-nowrap"></table>
+            </div>
+        </div>
+    </div>
+</div>
+<script data-th-src="@{js/app/examine/question/question.js}"></script>
+<script data-th-src="@{js/app/examine/question/questionEdit.js}"></script>

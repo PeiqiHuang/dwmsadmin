@@ -1,0 +1,10 @@
+spring:
+    datasource:
+        druid:
+            # 数据库访问配置, 使用druid数据源
+            url: jdbc:mysql://120.26.54.153:3306/dwms?useUnicode=true&characterEncoding=utf8
+            username: dwms
+            password: dwms_20181114
+            #url: jdbc:mysql://127.0.0.1:3306/mrbird?useUnicode=true&characterEncoding=utf8
+            #username: root
+            #password:

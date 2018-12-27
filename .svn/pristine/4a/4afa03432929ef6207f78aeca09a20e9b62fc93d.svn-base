@@ -1,0 +1,76 @@
+var validator;
+var $entityBatchForm = $("#entity-batch-form");
+
+$(function () {
+    validateRule();
+    createPartyTree();
+    
+    //file upload
+    $("input[name='batchFile']").fileinput({
+    	language: "zh",
+    	showUpload: false, 
+    	showCaption: false, 
+    	dropZoneEnabled: false,
+    	allowedFileExtensions: ['xls']
+	});
+
+    $("#entity-batch .btn-save").click(function () {
+    	var name = $(this).attr("name");
+        getParty();
+        validator = $entityAddForm.validate();
+        var flag = validator.form();
+        if (flag) {
+        	if (name === "save") {
+        		var options = {
+		            url : ctx + "user/batch",
+		            dataType : "json",
+		            type : "post",
+		            success : function (r) {
+		            	if (r.code === 0) {
+	        				closeModal();
+	        				refresh();
+	        				$MB.n_success(r.msg);
+	        			} else $MB.n_danger(r.msg);
+		            }
+		        };
+        		$entityAddForm.ajaxSubmit(options);
+        	}
+        }
+    });
+
+    $("#entity-batch .btn-close").click(function () {
+        closeModal();
+    });
+
+});
+
+function closeModal() {
+    validator.resetForm();
+    $MB.closeAndRestModal("entity-batch");
+    refreshPartyTree();
+}
+
+function validateRule() {
+    var icon = "<i class='zmdi zmdi-close-circle zmdi-hc-fw'></i> ";
+    validator = $entityAddForm.validate({
+        rules: {
+            batchFile: {
+            	required: true
+            },
+            partyId: {
+            	required: true
+            }
+        },
+        errorPlacement: function (error, element) {
+            if (element.is(":checkbox") || element.is(":radio")) {
+                error.appendTo(element.parent().parent());
+            } else {
+                error.insertAfter(element);
+            }
+        },
+        messages: {
+            batchFile: icon + "请上传文件",
+        	partyId: icon + "请选择党支部"
+        }
+    });
+}

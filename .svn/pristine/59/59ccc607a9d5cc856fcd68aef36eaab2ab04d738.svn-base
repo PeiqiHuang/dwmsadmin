@@ -1,0 +1,37 @@
+function createRecorderTree() {
+    $.post(ctx + "user/getUsers", {}, function (r) {
+        if (r.code === 0) {
+            var data = r.msg;
+            $('#recorderTree').jstree({
+                "core": {
+                    'data': data.children,
+                    'multiple': false
+                },
+                "state": {
+                    "disabled": true
+                },
+                "checkbox": {
+                    "three_state": false
+                },
+                "plugins": ["wholerow", "checkbox"]
+            });
+        } else {
+            $MB.n_danger(r.msg);
+        }
+    })
+}
+
+function getRecorder() {
+	var ref = $('#recorderTree').jstree(true);
+	var ids = ref.get_checked();
+	$("[name='recorder']").val(ids[0]);
+}
+
+function refreshRecorderTree() {
+	$MB.refreshJsTree("recorderTree", createRecorderTree());
+}
+
+function recorderTreeSelect(id) {
+	var $recorderTree = $('#recorderTree');
+	$recorderTree.jstree('select_node', id, true);
+}

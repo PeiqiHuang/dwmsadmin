@@ -1,0 +1,45 @@
+<div class="modal fade" id="entity-batch" data-keyboard="false" data-backdrop="static" ><!-- tabindex="-1" 去掉，否则日期控件不能选择年月下拉 -->
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title pull-left" id="entity-batch-modal-title">新增党员</h3>
+            </div>
+            <div class="modal-body">
+                <form id="entity-batch-form" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="input-group">
+                                <span class="input-group-addon">
+                                                                                                                上传xls文件：
+                                </span>
+                                <div class="form-group">
+                                    <input name="batchFile" type="file" >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="party" class="row"  th:if="${isAdmin}">
+                        <div class="col-sm-11">
+                            <div class="input-group">
+                                <span class="input-group-addon" style="justify-content: flex-start;margin-top: .5rem;">
+                                                                                                            党支部：
+                                 </span>
+                                <div class="form-group">
+                                    <div id="partyTree"></div>
+                                </div>
+                                <input type="hidden" name="partyId">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-save" id="entity-add-button" name="save">上传</button>
+                <button type="button" class="btn btn-secondary btn-close">关闭</button>
+                <button class="btn-hide"></button>
+            </div>
+        </div>
+    </div>
+</div>
+<script data-th-src="@{js/app/common/party.js}"></script>
+<script data-th-src="@{js/app/user/userBatch.js}"></script>

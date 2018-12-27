@@ -1,0 +1,18 @@
+package com.dwms.meeting.service;
+
+import java.util.List;
+
+import com.dwms.common.domain.ResponseBo;
+import com.dwms.common.service.IService;
+import com.dwms.meeting.domain.MtgSummary;
+
+public interface MtgSummaryService extends IService<MtgSummary> {
+
+	List<MtgSummary> findAll(MtgSummary sum);
+
+	void addMtgSummary(MtgSummary sum, String[] users);
+
+	void updateMtgSummary(MtgSummary sum, String[] users);
+
+	ResponseBo deleteMtgSummarys(String ids);
+}

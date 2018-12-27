@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dwms.activity.dao.ActUserMapper">
+  <resultMap id="BaseResultMap" type="com.dwms.activity.domain.ActUser">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="auId" jdbcType="INTEGER" property="auId" />
+    <result column="actId" jdbcType="INTEGER" property="actId" />
+    <result column="userId" jdbcType="VARCHAR" property="userId" />
+    <result column="status" jdbcType="TINYINT" property="status" />
+    <result column="updateTime" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="createTime" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+  
+  <select id="findAllByActId" resultType="actUser">
+    select au.*, u.userName from tb_activity_user au 
+    left join tb_user_info u on au.userId=u.userId
+    where au.actId = #{actId}
+    <if test="userName != null and userName != ''">
+        AND u.userName like concat('%',#{userName},'%') 
+    </if>
+    <if test="status != null">
+        AND au.status = #{status}
+    </if>
+    order by au.status desc, au.updateTime desc, au.createTime desc
+  </select>
+</mapper>

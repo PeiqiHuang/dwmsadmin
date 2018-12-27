@@ -1,0 +1,38 @@
+#图片设置
+image:
+    #uploadpath: C:/dwmsres #上传路径
+    #accesspath: file:///C:/dwmsres #访问路径
+    uploadpath: C:/apache-tomcat-7.0.75/webapps/dwmsres #上传路径
+    accesspath: http://localhost:8081/dwmsres #访问路径
+    types: jpeg,jpg,png,gif,bmp #常见图片类型
+
+    root: /image
+    user:
+      avatar: /user/avatar #用户头像地址
+      
+    #会议纪要
+    mtgSummary: /mtgSummary
+    #微党课
+    course: /course
+    
+
+#html文件设置
+html:
+    root: /html
+    #会议纪要
+    mtgSummary: /mtgSummary
+    
+#上传文件设置
+file:
+    root: /file
+    #会议纪要
+    mtgSummary: /mtgSummary
+    #微党课
+    course: /course
+
+#党员初始密码
+user:
+    password: 123456
+#超管角色ID
+admin:
+    roleId: 1

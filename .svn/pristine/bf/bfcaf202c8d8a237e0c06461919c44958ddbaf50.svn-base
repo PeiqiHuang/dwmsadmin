@@ -1,0 +1,58 @@
+<div class="modal fade" id="news-add" data-keyboard="false" data-backdrop="static" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title pull-left" id="news-add-modal-title">新增新闻</h3>
+            </div>
+            <div class="modal-body">
+                <form id="news-add-form">
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="input-group">
+                                <span class="input-group-addon">
+					               	标题：
+					            </span>
+                                <div class="form-group">
+                                    <input type="text" name="title" class="form-control">
+                                    <input type="text" name="newsId" hidden class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-11">
+                            <div class="input-group" style="margin-top:10px;">
+                                <span class="input-group-addon">
+					               	状态：
+					             </span>
+                                <div class="form-group">
+                                    <label class="custom-control custom-radio">
+                                        <input name="status" type="radio" value="0" class="custom-control-input">
+                                        <span class="custom-control-indicator"></span>
+                                        <span class="custom-control-description">未发布</span>
+                                    </label>
+                                    <label class="custom-control custom-radio">
+                                        <input name="status" type="radio" value="1" class="custom-control-input">
+                                        <span class="custom-control-indicator"></span>
+                                        <span class="custom-control-description">已发布</span>
+                                    </label>
+                                    <label class="custom-control custom-radio">
+                                        <input name="status" type="radio" value="-1" class="custom-control-input">
+                                        <span class="custom-control-indicator"></span>
+                                        <span class="custom-control-description">失效</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-save" id="news-add-button" name="save">保存</button>
+                <button type="button" class="btn btn-secondary btn-close">关闭</button>
+                <button class="btn-hide"></button>
+            </div>
+        </div>
+    </div>
+</div>
+<script data-th-src="@{js/app/push/news/newsAdd.js}"></script>

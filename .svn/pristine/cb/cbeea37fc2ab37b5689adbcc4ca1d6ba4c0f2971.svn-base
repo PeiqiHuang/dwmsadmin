@@ -1,0 +1,43 @@
+function updateEntity() {
+	var selected = $("#entityTable").bootstrapTable('getSelections');
+    var selected_length = selected.length;
+    if (!selected_length) {
+        $MB.n_warning('请勾选需要修改的会议纪要！');
+        return;
+    }
+    if (selected_length > 1) {
+        $MB.n_warning('一次只能修改一个会议纪要！');
+        return;
+    }
+    var entityId = selected[0].sumId;
+    $.post(ctx + "mtgSummary/getMtgSummary", {"sumId": entityId}, function (r) {
+        if (r.code === 0) {
+        	$("#entity-add-modal-title").html('修改会议纪要');
+        	$("#entity-add-button").attr("name", "update");
+            var $form = $('#entity-add');
+            var entity = r.msg;
+            showModal($form, entity);
+            //app创建的不能修改
+            if (entity.source == 2) $("#entity-add-button").prop("hidden", true);
+        } else {
+            $MB.n_danger(r.msg);
+        }
+    });
+}
+
+function showModal($form, entity) {
+	$form.modal();
+    $form.find("input[name='mtgId']").val(entity.mtgId);
+    $form.find("input[name='sumId']").val(entity.sumId);
+    $form.find("input[name='sumTitle']").val(entity.sumTitle);
+    setStatus(entity.status);
+    //参会党员
+    var userArr = [];
+    for (var i = 0; i < entity.userIds.length; i++) {
+    	userArr.push(entity.userIds[i]);
+    }
+    $usersSelect.multipleSelect('setSelects', userArr);
+    $users.val($usersSelect.val());
+    //编辑器
+    myEditor.setData(entity.content);
+}

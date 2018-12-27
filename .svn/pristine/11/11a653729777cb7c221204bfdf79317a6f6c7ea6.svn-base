@@ -1,0 +1,136 @@
+package com.dwms.course.controller;
+
+import java.util.List;
+import java.util.Map;
+
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.dwms.common.annotation.Log;
+import com.dwms.common.controller.BaseController;
+import com.dwms.common.domain.QueryRequest;
+import com.dwms.common.domain.ResponseBo;
+import com.dwms.common.util.FileUtils;
+import com.dwms.course.domain.Course;
+import com.dwms.course.domain.CourseCat;
+import com.dwms.course.domain.form.CourseForm;
+import com.dwms.course.domain.vo.CourseWithUser;
+import com.dwms.course.service.CourseCatService;
+import com.dwms.course.service.CourseService;
+
+@Controller
+public class CourseController extends BaseController {
+
+    private Logger log = LoggerFactory.getLogger(this.getClass());
+
+    @Autowired
+    private CourseService courseService;
+    
+    @Autowired
+    private CourseCatService courseCatService;
+
+    @RequestMapping("course")
+    @RequiresPermissions("course:list")
+    public String index(Model model) {
+    	model.addAttribute("isAdmin", isAdmin());
+        return "course/course";
+    }
+    
+    @RequestMapping("course/getCourse")
+    @ResponseBody
+    public ResponseBo getCourse(Integer courseId) {
+        try {
+            CourseWithUser course = this.courseService.findById(courseId);
+            return ResponseBo.ok(course);
+        } catch (Exception e) {
+            log.error("获取党课失败", e);
+            return ResponseBo.error("获取党课失败，请联系网站管理员！");
+        }
+    }
+
+    @Log("获取党课信息")
+    @RequestMapping("course/list")
+    @RequiresPermissions("course:list")
+    @ResponseBody
+    public Map<String, Object> courseList(QueryRequest request, Course course) {
+    	if (!isAdmin()) {
+    		course.setPartyId(getPartyId());
+    	}
+        return super.selectByPageNumSize(request, () -> this.courseService.findAllCourses(course));
+    }
+
+    @RequestMapping("course/excel")
+    @ResponseBody
+    public ResponseBo courseExcel(Course course) {
+        try {
+            List<Course> list = this.courseService.findAllCourses(course);
+            return FileUtils.createExcelByPOIKit("党课表", list, Course.class);
+        } catch (Exception e) {
+            log.error("导出党课信息Excel失败", e);
+            return ResponseBo.error("导出Excel失败，请联系网站管理员！");
+        }
+    }
+
+    @RequestMapping("course/csv")
+    @ResponseBody
+    public ResponseBo courseCsv(Course course) {
+        try {
+            List<Course> list = this.courseService.findAllCourses(course);
+            return FileUtils.createCsv("党课表", list, Course.class);
+        } catch (Exception e) {
+            log.error("导出党课信息Csv失败", e);
+            return ResponseBo.error("导出Csv失败，请联系网站管理员！");
+        }
+    }
+
+    @Log("新增党课")
+    @RequiresPermissions("course:add")
+    @RequestMapping("course/add")
+    @ResponseBody
+    public ResponseBo addCourse(CourseForm form, MultipartFile img, MultipartFile file) {
+    	if (null == form.getPartyId()) {
+    	    form.setPartyId(getPartyId());
+    	}
+        try {
+            form.setFiles(new MultipartFile[]{img, file});
+            return this.courseService.addCourse(form);
+        } catch (Exception e) {
+            log.error("新增党课失败", e);
+            return ResponseBo.error("新增党课失败，请联系网站管理员！");
+        }
+    }
+
+    @Log("修改党课")
+    @RequiresPermissions("course:update")
+    @RequestMapping("course/update")
+    @ResponseBody
+    public ResponseBo updateCourse(CourseForm form, MultipartFile img, MultipartFile file) {//MultipartFile放在form中接收，不上传会报错
+        try {
+            form.setFiles(new MultipartFile[]{img, file});
+            return this.courseService.updateCourse(form);
+        } catch (Exception e) {
+            log.error("修改党课失败", e);
+            return ResponseBo.error("修改党课失败，请联系网站管理员！");
+        }
+    }
+    
+    @Log("删除党课")
+    @RequiresPermissions("course:delete")
+    @RequestMapping("course/delete")
+    @ResponseBody
+    public ResponseBo deleteCourse(String ids) {
+        try {
+        	return this.courseService.deleteCourses(ids);
+        } catch (Exception e) {
+            log.error("删除党课失败", e);
+            return ResponseBo.error("删除党课失败，请联系网站管理员！");
+        }
+    }
+}

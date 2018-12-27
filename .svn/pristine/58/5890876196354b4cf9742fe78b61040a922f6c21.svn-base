@@ -1,0 +1,76 @@
+<div class="card">
+    <div class="card-block">
+        <div class="table-responsive">
+            <div id="data-table_wrapper" class="dataTables_wrapper">
+                <div class="dataTables_buttons hidden-sm-down actions">
+                    <span class="actions__item zmdi zmdi-search" onclick="search()" title="搜索" /> <span class="actions__item zmdi zmdi-refresh-alt" onclick="refresh()" title="刷新" />
+                    <div class="dropdown actions__item">
+                        <i data-toggle="dropdown" class="zmdi zmdi-download"> </i>
+                        <ul class="dropdown-menu dropdown-menu-right">
+                            <a href="javascript:void(0)" class="dropdown-item" data-table-action="excel" onclick="exportEntityExcel()">
+							Excel (.xlsx) </a>
+                            <a href="javascript:void(0)" class="dropdown-item" data-table-action="csv" onclick="exportEntityCsv()"> CSV
+							(.csv) </a>
+                        </ul>
+                    </div>
+                </div>
+                <div id="data-table_filter" class="dataTables_filter">
+                    <form class="entity-table-form">
+                        <div class="row">
+                        	<div class="col-sm-3">
+                                <div class="input-group">
+                                    <span class="input-group-addon"> 参会人员： </span>
+                                    <div class="form-group">
+                                        <input type="text" name="userName" class="form-control"> <i class="form-group__bar"></i>
+                                        <input type="text" name="mtgId" hidden th:value="${mtgId}">
+                                    </div>
+                                </div>
+                            </div>
+                        	<div class="col-sm-3">
+                                <div class="input-group">
+                                    <span class="input-group-addon"> 状态： </span>
+                                    <div class="form-group">
+                                        <select class="form-control" name="status">
+                                            <option value="" selected>所有</option>
+                                            <option value="1">已签到</option>
+                                            <option value="0">已确认</option>
+                                            <option value="-1">未确认</option>
+                                            <option value="-9">请假</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        	<div class="col-sm-3">
+                                <div class="input-group">
+                                    <span class="input-group-addon"> 签到方式： </span>
+                                    <div class="form-group">
+                                        <select class="form-control" name="signWay">
+                                            <option value="" selected>所有</option>
+                                            <option value="1">自签</option>
+                                            <option value="2">代签</option>
+                                            <option value="3">补签</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        	<!-- <div class="col-sm-3">
+                                <div class="input-group">
+                                    <span class="input-group-addon"> 查看会议纪要： </span>
+                                    <div class="form-group">
+                                        <select class="form-control" name="readSummary">
+                                            <option value="" selected>所有</option>
+                                            <option value="1">允许</option>
+                                            <option value="0">禁止</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div> -->
+                        </div>
+                    </form>
+                </div>
+                <table id="entityTable" data-mobile-responsive="true" class="mb-bootstrap-table text-nowrap"></table>
+            </div>
+        </div>
+    </div>
+</div>
+<script data-th-src="@{js/app/meeting/mtgUser/mtgUser.js}"></script>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dwms.advert.dao.AdvertMapper">
+  <resultMap id="BaseResultMap" type="com.dwms.advert.domain.Advert">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="adId" jdbcType="INTEGER" property="adId" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="action" jdbcType="VARCHAR" property="action" />
+    <result column="summary" jdbcType="VARCHAR" property="summary" />
+    <result column="weight" jdbcType="TINYINT" property="weight" />
+    <result column="adKey" jdbcType="VARCHAR" property="adKey" />
+    <result column="beginTime" jdbcType="TIMESTAMP" property="beginTime" />
+    <result column="endTime" jdbcType="TIMESTAMP" property="endTime" />
+    <result column="status" jdbcType="TINYINT" property="status" />
+    <result column="createTime" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="updateTime" jdbcType="TIMESTAMP" property="updateTime" />
+  </resultMap>
+  
+ <select id="findAllAdverts" resultType="advert">
+    select a.*, ak.keyName from tb_advert_info a 
+    left join tb_advert_key ak on ak.adKey=a.adKey
+    where 1=1
+    <if test="partyId != null and partyId != ''">
+        AND a.partyId = #{partyId}
+    </if>
+    <if test="status != null">
+        AND a.status = #{status}
+    </if>
+    <if test="adKey != null and adKey != ''">
+        AND a.adKey = #{adKey}
+    </if>
+    <if test="name != null and name != ''">
+        AND a.name like concat('%',#{name},'%') 
+    </if>
+    <if test="timeField != null and timeField != ''">
+        AND date_format(a.createTime,'%Y-%m-%d') &gt;= #{beginField}
+        AND date_format(a.createTime,'%Y-%m-%d') &lt;= #{endField}
+    </if>
+    order by a.status desc, a.weight desc, a.createTime desc
+  </select>  
+</mapper>

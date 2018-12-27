@@ -1,0 +1,50 @@
+package com.dwms.common.config;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+@ConfigurationProperties(prefix = "resource")
+public class ResProperties {
+
+    private String root;
+    
+    private String url;
+    
+    private FileProperties file;
+    
+    private ImgProperties img;
+
+	public String getRoot() {
+		return root;
+	}
+
+	public void setRoot(String root) {
+		this.root = root;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public FileProperties getFile() {
+		return file;
+	}
+
+	public void setFile(FileProperties file) {
+		this.file = file;
+	}
+
+	public ImgProperties getImg() {
+		return img;
+	}
+
+	public void setImg(ImgProperties img) {
+		this.img = img;
+	}
+	
+}

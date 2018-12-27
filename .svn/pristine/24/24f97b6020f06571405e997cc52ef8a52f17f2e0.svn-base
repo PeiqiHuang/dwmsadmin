@@ -1,0 +1,154 @@
+$(function() {
+    initTable();
+    initPartySearch();
+});
+
+function initTable() {
+	var $tableForm = $(".entity-table-form");
+	var $party = $tableForm.find("select[name='partyId']");
+    var setting = {
+        url: ctx + 'meeting/list',
+        pageSize: 10,
+        queryParams: function(params) {
+            return {
+                pageSize: params.limit,
+                pageNum: params.offset / params.limit + 1,
+                partyId: $party[0] == undefined ? '' : $party.val().trim(),
+                mtgName: $tableForm.find("input[name='mtgName']").val().trim(),
+                timeField: $tableForm.find("input[name='timeField']").val().trim(),
+                status: $tableForm.find("select[name='status']").val().trim(),
+            };
+        },
+        columns: [{
+	            checkbox: true
+	        },
+            /*{
+                title: '编号',
+                field: 'mtgId',
+                width: '50px'
+            },*/
+            {
+                title: '会议主题',
+                field: 'mtgName'
+            },
+            {
+            	title: '会议议题',
+            	field: 'mtgTitle'
+            },
+            {
+            	title: '会议要求',
+            	field: 'mtgDesc'
+            },
+            {
+            	title: '地点',
+            	field: 'address'
+            },
+            {
+            	title: '状态',
+            	field: 'status',
+                formatter: function (value, row, index) {
+                	if (value === -9) return '<span class="badge badge-danger">已删除</span>';
+                    if (value === -1) return '<span class="badge badge-danger">已取消</span>';
+                    if (value === 0) return '<span class="badge badge-warning">待发布</span>';
+                    if (value === 1) return '<span class="badge badge-success">已发布</span>';
+                }
+            },
+            {
+                title: '开始时间',
+                field: 'beginTime'
+            },
+            {
+                title: '结束时间',
+                field: 'endTime'
+            },
+            {
+                title: '创建时间',
+                field: 'createTime'
+            }
+        ]
+    };
+    $MB.initTable('entityTable', setting);
+    $MB.calenders('input[name="timeField"]', true, false);
+}
+
+function search() {
+	$MB.refreshTable('entityTable');
+}
+
+function refresh() {
+    $(".entity-table-form")[0].reset();
+    search();
+}
+
+function deleteEntity() {
+    var selected = $("#entityTable").bootstrapTable('getSelections');
+    var selected_length = selected.length;
+    if (!selected_length) {
+        $MB.n_warning('请勾选需要删除的会议！');
+        return;
+    }
+    var ids = "";
+    for (var i = 0; i < selected_length; i++) {
+        ids += selected[i].mtgId;
+        if (i !== (selected_length - 1)) ids += ",";
+    }
+    $MB.confirm({
+        text: "确定删除选中的会议？",
+        confirmButtonText: "确定删除"
+    }, function() {
+        $.post(ctx + 'meeting/delete', { "ids": ids }, function(r) {
+            if (r.code === 0) {
+                $MB.n_success(r.msg);
+                refresh();
+            } else {
+                $MB.n_danger(r.msg);
+            }
+        });
+    });
+}
+
+function exportEntityExcel(){
+	$.post(ctx+"meeting/excel",$(".entity-table-form").serialize(),function(r){
+		if (r.code === 0) {
+			window.location.href = "common/download?fileName=" + r.msg + "&delete=" + true;
+		} else {
+			$MB.n_warning(r.msg);
+		}
+	});
+}
+
+function exportEntityCsv(){
+	$.post(ctx+"meeting/csv",$(".entity-table-form").serialize(),function(r){
+		if (r.code === 0) {
+			window.location.href = "common/download?fileName=" + r.msg + "&delete=" + true;
+		} else {
+			$MB.n_warning(r.msg);
+		}
+	});
+}
+
+function openMtgUser() {
+	var selected = $("#entityTable").bootstrapTable('getSelections');
+    var selected_length = selected.length;
+    if (!selected_length || selected_length > 1) {
+        $MB.n_warning('请勾选一个会议！');
+        return;
+    }
+    var entityId = selected[0].mtgId;
+    var mtgName = selected[0].mtgName;
+	var url = "mtgUser?mtgId=" + entityId;
+	openPage(url, mtgName + "参会统计");
+}
+
+function openMtgSummary() {
+	var selected = $("#entityTable").bootstrapTable('getSelections');
+	var selected_length = selected.length;
+	if (!selected_length || selected_length > 1) {
+		$MB.n_warning('请勾选一个会议！');
+		return;
+	}
+	var entityId = selected[0].mtgId;
+	var mtgName = selected[0].mtgName;
+	var url = "mtgSummary?mtgId=" + entityId;
+	openPage(url, mtgName + "会议纪要");
+}

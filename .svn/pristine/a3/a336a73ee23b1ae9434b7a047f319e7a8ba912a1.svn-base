@@ -1,0 +1,77 @@
+<div class="card">
+    <div data-th-include="examine/examAdd"></div>
+    <div class="card-block">
+        <div class="table-responsive">
+            <div id="data-table_wrapper" class="dataTables_wrapper">
+                <div class="dataTables_buttons hidden-sm-down actions">
+                    <span class="actions__item zmdi zmdi-search" onclick="search()" title="搜索" /> <span class="actions__item zmdi zmdi-refresh-alt" onclick="refresh()" title="刷新" />
+                    <span class="actions__item zmdi zmdi-star" onclick="openQu()" title="题库" />
+                    <div class="dropdown actions__item" shiro:hasAnyPermissions="exam:add,exam:delete,exam:update,exam:user">
+                        <i data-toggle="dropdown" class="zmdi zmdi-more-vert"></i>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <a href="javascript:void(0)" class="dropdown-item" onclick="addEntity()" shiro:hasPermission="exam:add">新增考试</a>
+                            <a href="javascript:void(0)" class="dropdown-item" onclick="updateEntity()" shiro:hasPermission="exam:update">修改考试</a>
+                            <a href="javascript:void(0)" class="dropdown-item" onclick="copyEntity()" shiro:hasPermission="exam:add">复制考试</a>
+                            <a href="javascript:void(0)" class="dropdown-item" onclick="deleteEntity()" shiro:hasPermission="exam:delete">删除考试</a>
+                            <a href="javascript:void(0)" class="dropdown-item" onclick="openExamQu()" shiro:hasPermission="examQu:list">考试题目</a>
+                            <a href="javascript:void(0)" class="dropdown-item" onclick="openExamUser()" shiro:hasPermission="exam:user">考试统计</a>
+                            <a href="javascript:void(0)" class="dropdown-item" onclick="openQuUser()" shiro:hasPermission="exam:user">试题统计</a>
+                            <a href="javascript:void(0)" class="dropdown-item" onclick="makeup()" shiro:hasPermission="exam:update">发起补考</a>
+                        </div>
+                    </div>
+                </div>
+                <div id="data-table_filter" class="dataTables_filter">
+                    <form class="entity-table-form">
+                        <div class="row">
+                        	<div class="col-sm-3">
+                                <div class="input-group">
+                                    <span class="input-group-addon">
+					               	创建时间：
+					            </span>
+                                    <div class="form-group">
+                                        <input type="text" name="timeField" class="form-control">
+                                        <i class="form-group__bar"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="input-group">
+                                    <span class="input-group-addon"> 试卷标题： </span>
+                                    <div class="form-group">
+                                        <input type="text" name="examName" class="form-control"> <i class="form-group__bar"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="input-group">
+                                    <span class="input-group-addon"> 状态： </span>
+                                    <div class="form-group">
+                                        <select class="form-control" name="status">
+                                            <option value="" selected>所有</option>
+                                            <option value="1">已发布</option>
+                                            <option value="0">待发布</option>
+                                            <option value="-1">已取消</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="party" class="col-sm-3" th:if="${isAdmin}">
+                                <div class="input-group">
+                                    <span class="input-group-addon"> 党支部： </span>
+                                    <div class="form-group">
+                                        <select class="form-control" name="partyId">
+                                            <option value="" selected>所有</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <table id="entityTable" data-mobile-responsive="true" class="mb-bootstrap-table text-nowrap"></table>
+            </div>
+        </div>
+    </div>
+</div>
+<script data-th-src="@{js/app/examine/exam.js}"></script>
+<script data-th-src="@{js/app/examine/examEdit.js}"></script>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dwms.course.dao.CourseMapper">
+  <resultMap id="BaseResultMap" type="com.dwms.course.domain.Course">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="courseId" jdbcType="INTEGER" property="courseId" />
+    <result column="partyId" jdbcType="INTEGER" property="partyId" />
+    <result column="categoryId" jdbcType="INTEGER" property="categoryId" />
+    <result column="courseName" jdbcType="VARCHAR" property="courseName" />
+    <result column="courseDesc" jdbcType="VARCHAR" property="courseDesc" />
+    <result column="cover" jdbcType="VARCHAR" property="cover" />
+    <result column="banner" jdbcType="VARCHAR" property="banner" />
+    <result column="filePath" jdbcType="VARCHAR" property="filePath" />
+    <result column="courseType" jdbcType="INTEGER" property="courseType" />
+    <result column="chapterNum" jdbcType="INTEGER" property="chapterNum" />
+    <result column="timeLength" jdbcType="INTEGER" property="timeLength" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+    <result column="endTime" jdbcType="DATE" property="endTime" />
+    <result column="releaseTime" jdbcType="TIMESTAMP" property="releaseTime" />
+    <result column="createTime" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+  
+  <select id="findById" resultType="courseWithUser">
+  	select c.*, cu.userId from tb_course_info c
+  	left join tb_course_user cu on c.courseId=cu.courseId
+	where c.courseId = #{courseId}
+  </select>
+  
+  <select id="findAllCourses" resultType="course">
+    select c.*, cc.categoryName from tb_course_info c 
+    left join tb_course_category cc on c.categoryId=cc.categoryId
+    where c.status != -9 
+    <if test="partyId != null and partyId != ''">
+        AND c.partyId = #{partyId}
+    </if>
+    <if test="status != null">
+        AND c.status = #{status}
+    </if>
+    <if test="categoryId != null and categoryId != ''">
+        AND c.categoryId = #{categoryId}
+    </if>
+    <if test="courseName != null and courseName != ''">
+        AND c.courseName like concat('%',#{courseName},'%') 
+    </if>
+    <if test="timeField != null and timeField != ''">
+        AND date_format(c.createTime,'%Y-%m-%d') &gt;= #{beginField}
+        AND date_format(c.createTime,'%Y-%m-%d') &lt;= #{endField}
+    </if>
+    order by c.status desc, c.createTime desc
+  </select>
+</mapper>

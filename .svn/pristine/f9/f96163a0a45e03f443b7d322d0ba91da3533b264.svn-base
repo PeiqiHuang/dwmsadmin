@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dwms.course.dao.CourseChapterMapper">
+  <resultMap id="BaseResultMap" type="com.dwms.course.domain.CourseChapter">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="chapterId" jdbcType="INTEGER" property="chapterId" />
+    <result column="parentId" jdbcType="INTEGER" property="parentId" />
+    <result column="courseId" jdbcType="INTEGER" property="courseId" />
+    <result column="chapterNo" jdbcType="INTEGER" property="chapterNo" />
+    <result column="chapterTitle" jdbcType="VARCHAR" property="chapterTitle" />
+    <result column="chapterType" jdbcType="INTEGER" property="chapterType" />
+    <result column="timeLength" jdbcType="INTEGER" property="timeLength" />
+    <result column="content" jdbcType="LONGVARCHAR" property="content" />
+  </resultMap>
+  
+  <select id="getChapterNum" resultType="java.lang.Integer">
+    select count(*) from tb_course_chapter c1 where c1.courseId=#{courseId} 
+    and not EXISTS
+    (select 1 from tb_course_chapter c2 where c1.chapterId=c2.parentId)
+  </select>
+  
+</mapper>

@@ -1,0 +1,354 @@
+package com.dwms.course.service.impl;
+
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.collections.ListUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import tk.mybatis.mapper.entity.Example;
+
+import com.dwms.common.config.ConstantConfig;
+import com.dwms.common.config.FileConfig;
+import com.dwms.common.config.ImageConfig;
+import com.dwms.common.domain.ResponseBo;
+import com.dwms.common.service.impl.BaseService;
+import com.dwms.common.util.ChapterManager;
+import com.dwms.common.util.FileUtils;
+import com.dwms.common.util.PathUtils;
+import com.dwms.course.dao.CourseChapterMapper;
+import com.dwms.course.dao.CourseMapper;
+import com.dwms.course.dao.CourseUserMapper;
+import com.dwms.course.domain.Course;
+import com.dwms.course.domain.CourseChapter;
+import com.dwms.course.domain.CourseUser;
+import com.dwms.course.domain.form.CourseForm;
+import com.dwms.course.domain.vo.CourseWithUser;
+import com.dwms.course.service.CourseChapterService;
+import com.dwms.course.service.CourseService;
+import com.google.common.collect.Lists;
+
+@Service("courseService")
+@Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
+public class CourseServiceImpl extends BaseService<Course> implements CourseService {
+
+    private Logger log = LoggerFactory.getLogger(this.getClass());
+
+    @Autowired
+    private ImageConfig imageConfig;
+    @Autowired
+    private FileConfig fileConfig;
+    @Autowired
+    private ConstantConfig constantConfig;
+    
+    @Autowired
+    private CourseMapper courseMapper;
+    
+    @Autowired
+    private CourseChapterMapper courseChapterMapper;
+    
+    @Autowired
+    private CourseUserMapper courseUserMapper;
+    
+    @Autowired
+    private CourseChapterService courseChapterService;
+
+    @Override
+    public List<Course> findAllCourses(Course course) {
+    	try {
+			/*Example example = new Example(Course.class);
+			Criteria criteria = example.createCriteria();
+			criteria.andCondition("status != ", Course.STATUS_DELETE);//不显示状态为删除的
+			if (null != course.getPartyId()) {
+				criteria.andCondition("partyId = ", course.getPartyId());
+			}
+			if (null != course.getCategoryId()) {
+			    criteria.andCondition("categoryId = ", course.getCategoryId());
+			}
+			if (StringUtils.isNotBlank(course.getCourseName())) {
+				criteria.andCondition("courseName like ", "%" + course.getCourseName() + "%");
+			}
+			if (null != course.getStatus()) {
+				criteria.andCondition("status = ", course.getStatus());
+			}
+			if (StringUtils.isNotBlank(course.getTimeField())) {
+                String[] timeArr = course.getTimeField().split("~");
+                criteria.andCondition("date_format(createTime,'%Y-%m-%d') >=", timeArr[0]);
+                criteria.andCondition("date_format(createTime,'%Y-%m-%d') <=", timeArr[1]);
+            }
+			example.setOrderByClause("status desc, createTime desc");
+			List<Course> courses = this.selectByExample(example);*/
+    		List<Course> courses = this.courseMapper.findAllCourses(course);
+			PathUtils.setImgAcessPath(courses, "cover");
+			PathUtils.setImgAcessPath(courses, "banner");
+			PathUtils.setFileAcessPath(courses, "filePath");
+			return courses;
+		} catch (Exception e) {
+			log.error("获取党课列表失败", e);
+			return new ArrayList<>();
+		}
+    }
+
+    @Override
+    @Transactional
+    public ResponseBo addCourse(CourseForm form) {
+    	Course course = new Course();
+    	try {
+			BeanUtils.copyProperties(course, form);
+		} catch (IllegalAccessException | InvocationTargetException e) {
+			e.printStackTrace();
+			return ResponseBo.error("新增党课失败，请联系网站管理员！");
+		}
+        this.courseMapper.insertSelective(course);
+        //插入参与用户
+        addCourseUser(course, Arrays.asList(form.getUsers()));
+        
+        //上传封面
+        MultipartFile file = form.getFiles()[0];
+		if (null != file && !file.isEmpty()) {
+			ResponseBo r = FileUtils.saveImg(file, imageConfig.getCourseCover() + "/" + course.getCourseId());
+			if (r.success()) {
+				course.setCover((String)r.getMsg());
+			} else {
+				return r;
+			}
+    	}
+		this.updateNotNull(course);
+		//上传课程详情顶部图片
+		file = form.getFiles()[1];
+		if (null != file && !file.isEmpty()) {
+		    ResponseBo r = FileUtils.saveImg(file, imageConfig.getCourseBanner() + "/" + course.getCourseId());
+		    if (r.success()) {
+		        course.setBanner((String)r.getMsg());
+		    } else {
+		        return r;
+		    }
+		}
+		this.updateNotNull(course);
+		//上传文件
+		file = form.getFiles()[2];
+		if (null != file && !file.isEmpty()) {
+		    ResponseBo r = FileUtils.saveFile(file, fileConfig.getCourse() + "/" + course.getCourseId());
+		    if (r.success()) {
+		        course.setFilePath((String)r.getMsg());
+		    } else {
+		        return r;
+		    }
+		}
+		if (course.getStatus() == Course.STATUS_VALID) {
+            course.setReleaseTime(new Date());
+        }
+		this.updateNotNull(course);
+		//根据文件自动分章节
+		if (null != file && !file.isEmpty()) {
+		    createChapter(course, file);
+		}
+		//计算course的时长和课时
+		courseChapterService.updateCourseAndAllChapters(course.getCourseId());
+        
+        return ResponseBo.ok("新增党课成功！");
+    }
+
+    private void createChapter(Course course, MultipartFile file) {
+        try {
+            ChapterManager cm = new ChapterManager(file.getInputStream());
+            Integer parentId = 0;
+            while(cm.hasNext()) {
+                cm.next();
+                CourseChapter c = new CourseChapter();
+                c.setCourseId(course.getCourseId());
+                c.setChapterNo(cm.getChapterNo());
+                c.setChapterTitle(cm.getTitle().toString());
+                c.setContent(cm.getContent().toString());
+                c.setChapterType(cm.isSection() ? CourseChapter.CHAPTER_TYPE_SECTION : CourseChapter.CHAPTER_TYPE_CHAPTER);
+                c.setParentId(cm.isSection() ? parentId : 0);
+                double timeLength = (c.getContent().length()*constantConfig.getReadSpeed())/1000.0;
+                c.setTimeLength(new Double(Math.ceil(timeLength)).intValue());
+                this.courseChapterMapper.insertSelective(c);
+                
+                if (!cm.isSection())
+                    parentId = c.getChapterId();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void addCourseUser(Course course, List<String> users) {
+    	for(String userId :users) {
+    		CourseUser cu = new CourseUser();
+    		cu.setCourseId(course.getCourseId());
+    		cu.setUserId(userId);
+    		if (course.getStatus() == Course.STATUS_VALID) {
+    		    cu.setStatus(CourseUser.STATUS_VALID);
+    		}
+    		this.courseUserMapper.insertSelective(cu);
+    	}
+	}
+
+	@Override
+    @Transactional
+    public ResponseBo updateCourse(CourseForm form) {
+	    boolean noEdit = (null == form.getStatus());//发布后修改为null
+		Course course = new Course();
+    	try {
+			BeanUtils.copyProperties(course, form);
+		} catch (IllegalAccessException | InvocationTargetException e) {
+			e.printStackTrace();
+			return ResponseBo.error("修改党课失败，请联系网站管理员！");
+		}
+    	
+    	MultipartFile file = form.getFiles()[0];
+		if (null != file && !file.isEmpty()) {
+			ResponseBo r = FileUtils.saveImg(file, imageConfig.getCourseCover() + "/" + course.getCourseId());
+			if (r.success()) {
+				course.setCover((String)r.getMsg());
+			} else {
+				return r;
+			}
+    	}
+		file = form.getFiles()[1];
+		if (null != file && !file.isEmpty()) {
+		    ResponseBo r = FileUtils.saveImg(file, imageConfig.getCourseBanner() + "/" + course.getCourseId());
+		    if (r.success()) {
+		        course.setBanner((String)r.getMsg());
+		    } else {
+		        return r;
+		    }
+		}
+		file = form.getFiles()[2];
+        if (null != file && !file.isEmpty()) {
+            ResponseBo r = FileUtils.saveFile(file, fileConfig.getCourse() + "/" + course.getCourseId());
+            if (r.success()) {
+                course.setFilePath((String)r.getMsg());
+            } else {
+                return r;
+            }
+        }
+        if (!noEdit && course.getStatus() == Course.STATUS_VALID) {
+            course.setReleaseTime(new Date());
+        }
+        this.updateNotNull(course);
+        //course = findById(course.getCourseId());
+        if(!noEdit) {
+            
+            //插入新的，删除剔除的用户
+            updateCourseUser(course, form.getUsers());
+            
+            //根据文件自动分章节
+            if (null != file && !file.isEmpty()) {
+                //删除已存在的所有章节
+                Example example = new Example(CourseChapter.class);
+                example.createCriteria().andCondition("courseId = ", course.getCourseId());
+                this.courseChapterMapper.deleteByExample(example);
+                createChapter(course, file);
+                //计算course的时长和课时
+                courseChapterService.updateCourseAndAllChapters(course.getCourseId());
+            }
+            
+        }
+        
+        return ResponseBo.ok("修改党课成功！");
+    }
+
+	private void updateCourseUser(Course course, String[] users) {
+		Example example = new Example(Course.class);
+		example.createCriteria().andCondition("courseId=", course.getCourseId());
+		List<CourseUser> cuList = this.courseUserMapper.selectByExample(example);
+		
+		List<String> cuUserList = Lists.newArrayList();
+		for (CourseUser mu : cuList) {
+			cuUserList.add(mu.getUserId());
+		}
+		List<String> userList = Arrays.asList(users);
+		// subtract(a,b) 截取a有的b没有的
+		List<String> delUsers = ListUtils.subtract(cuUserList, userList);
+		List<String> addUsers = ListUtils.subtract(userList, cuUserList);
+		List<String> unTouchUsers = ListUtils.intersection(userList, cuUserList);
+		//delete
+		if (!delUsers.isEmpty()) {
+			example = new Example(CourseUser.class);
+			example.createCriteria().andCondition("courseId=", course.getCourseId()).andIn("userId", delUsers);
+			this.courseUserMapper.deleteByExample(example);
+		}
+		//insert
+		addCourseUser(course, addUsers);
+		//unTouch修改状态
+		int status = CourseUser.STATUS_INVALID;
+		if (course.getStatus() == Course.STATUS_VALID) {
+            status = CourseUser.STATUS_VALID;
+        }
+		example = new Example(CourseUser.class);
+        example.createCriteria().andCondition("courseId=", course.getCourseId()).andIn("userId", unTouchUsers);
+        CourseUser cu = new CourseUser();
+        cu.setStatus(status);
+        this.courseUserMapper.updateByExampleSelective(cu, example);
+	}
+
+	@Override
+	@Transactional
+	public ResponseBo deleteCourses(String ids) {
+		List<String> list = Arrays.asList(ids.split(","));
+		List<Course> mtgList = Lists.newArrayList();
+		for (String id : list) {
+			Course course = selectByKey(NumberUtils.toInt(id));
+			int status = course.getStatus();
+			boolean delete = status != Course.STATUS_VALID;
+			/*if (status == Course.STATUS_VALID) {
+				if(DateUtil.compareDate(new Date(), course.getEndTime()) > 0) {//已结束
+					delete = true;
+				}
+			} else if (status == Course.STATUS_CANCEL
+					||status == Course.STATUS_WAIT) {
+				delete = true;
+			}*/
+			if (delete) {
+				course.setStatus(Course.STATUS_DELETE);
+				mtgList.add(course);
+			} else {
+				return ResponseBo.error("删除党课失败，不能删除已发布的党课！"); 
+			}
+		}
+		for(Course mtg : mtgList) {
+			this.updateNotNull(mtg);
+		}
+		return ResponseBo.ok("删除党课成功！");
+	}
+
+	@Override
+	public CourseWithUser findById(Integer courseId) {
+		List<CourseWithUser> list = this.courseMapper.findById(courseId);
+		if (list.isEmpty()) return null;
+		List<String> users = Lists.newArrayList();
+		for (CourseWithUser mtg : list) {
+			users.add(mtg.getUserId());
+		}
+		CourseWithUser vo = list.get(0);
+		vo.setUserIds(users);
+		
+		if (StringUtils.isNotBlank(vo.getCover())) {
+    		vo.setCover(imageConfig.getAccessPath() + vo.getCover());
+    	}
+		if (StringUtils.isNotBlank(vo.getBanner())) {
+		    vo.setBanner(imageConfig.getAccessPath() + vo.getBanner());
+		}
+		if (StringUtils.isNotBlank(vo.getFilePath())) {
+		    vo.setFilePath(fileConfig.getAccessPath() + vo.getFilePath());
+		}
+		
+		return vo;
+	}
+}

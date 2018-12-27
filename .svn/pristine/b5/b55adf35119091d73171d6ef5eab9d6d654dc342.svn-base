@@ -1,0 +1,264 @@
+package com.dwms.meeting.domain;
+
+import java.util.Date;
+
+import javax.persistence.*;
+
+@Table(name = "tb_meeting_summary")
+public class MtgSummary {
+	
+	/**
+	 * 状态
+	 */
+	public static final int STATUS_DELETE = -9;
+	public static final int STATUS_WAIT = 0;
+	public static final int STATUS_VALID = 1;
+	/**
+	 * 来源
+	 */
+	public static final int SOURCE_ADMIN = 1;
+	public static final int SOURCE_APP = 2;
+	
+    /**
+     * 纪要ID
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer sumId;
+
+    /**
+     * 会议ID
+     */
+    private Integer mtgId;
+
+    /**
+     * 纪要标题
+     */
+    private String sumTitle;
+
+    /**
+     * 撰写人ID（后台管理员或者app用户）
+     */
+    private String operator;
+
+    // 撰写人名称
+    @Transient
+    private String operatorName;
+    
+    /**
+     * 来源 1后台创建 2app创建
+     */
+    private Integer source;
+
+    /**
+     * 文件地址
+     */
+    private String filePath;
+
+    /**
+     * 状态 -1已删除 0待发布 1已发布
+     */
+    private Integer status;
+
+    /**
+     * 发布时间
+     */
+    private Date releaseTime;
+
+    /**
+     * 创建时间
+     */
+    private Date createTime;
+    
+    // 编辑器内容
+    @Transient
+    private String content;
+
+    /**
+     * 获取纪要ID
+     *
+     * @return sumId - 纪要ID
+     */
+    public Integer getSumId() {
+        return sumId;
+    }
+
+    /**
+     * 设置纪要ID
+     *
+     * @param sumId 纪要ID
+     */
+    public void setSumId(Integer sumId) {
+        this.sumId = sumId;
+    }
+
+    /**
+     * 获取会议ID
+     *
+     * @return mtgId - 会议ID
+     */
+    public Integer getMtgId() {
+        return mtgId;
+    }
+
+    /**
+     * 设置会议ID
+     *
+     * @param mtgId 会议ID
+     */
+    public void setMtgId(Integer mtgId) {
+        this.mtgId = mtgId;
+    }
+
+    /**
+     * 获取纪要标题
+     *
+     * @return sumTitle - 纪要标题
+     */
+    public String getSumTitle() {
+        return sumTitle;
+    }
+
+    /**
+     * 设置纪要标题
+     *
+     * @param sumTitle 纪要标题
+     */
+    public void setSumTitle(String sumTitle) {
+        this.sumTitle = sumTitle == null ? null : sumTitle.trim();
+    }
+
+    /**
+     * 获取撰写人ID（后台管理员或者app用户）
+     *
+     * @return operator - 撰写人ID（后台管理员或者app用户）
+     */
+    public String getOperator() {
+        return operator;
+    }
+
+    /**
+     * 设置撰写人ID（后台管理员或者app用户）
+     *
+     * @param operator 撰写人ID（后台管理员或者app用户）
+     */
+    public void setOperator(String operator) {
+        this.operator = operator == null ? null : operator.trim();
+    }
+
+    public String getOperatorName() {
+		return operatorName;
+	}
+
+	public void setOperatorName(String operatorName) {
+		this.operatorName = operatorName;
+	}
+
+	/**
+     * 获取来源 1后台创建 2app创建
+     *
+     * @return source - 来源 1后台创建 2app创建
+     */
+    public Integer getSource() {
+        return source;
+    }
+
+    /**
+     * 设置来源 1后台创建 2app创建
+     *
+     * @param source 来源 1后台创建 2app创建
+     */
+    public void setSource(Integer source) {
+        this.source = source;
+    }
+
+    /**
+     * 获取文件地址
+     *
+     * @return filePath - 文件地址
+     */
+    public String getFilePath() {
+        return filePath;
+    }
+
+    /**
+     * 设置文件地址
+     *
+     * @param filePath 文件地址
+     */
+    public void setFilePath(String filePath) {
+        this.filePath = filePath == null ? null : filePath.trim();
+    }
+
+    /**
+     * 获取状态 -1已删除 0待发布 1已发布
+     *
+     * @return status - 状态 -1已删除 0待发布 1已发布
+     */
+    public Integer getStatus() {
+        return status;
+    }
+
+    /**
+     * 设置状态 -1已删除 0待发布 1已发布
+     *
+     * @param status 状态 -1已删除 0待发布 1已发布
+     */
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    /**
+     * 获取发布时间
+     *
+     * @return releaseTime - 发布时间
+     */
+    public Date getReleaseTime() {
+        return releaseTime;
+    }
+
+    /**
+     * 设置发布时间
+     *
+     * @param releaseTime 发布时间
+     */
+    public void setReleaseTime(Date releaseTime) {
+        this.releaseTime = releaseTime;
+    }
+
+    /**
+     * 获取创建时间
+     *
+     * @return createTime - 创建时间
+     */
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    /**
+     * 设置创建时间
+     *
+     * @param createTime 创建时间
+     */
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+
+	public String getContent() {
+		return content;
+	}
+
+	public void setContent(String content) {
+		this.content = content;
+	}
+
+	@Override
+	public String toString() {
+		return "MtgSummary [sumId=" + sumId + ", mtgId=" + mtgId
+				+ ", sumTitle=" + sumTitle + ", operator=" + operator
+				+ ", source=" + source + ", filePath=" + filePath + ", status="
+				+ status + ", releaseTime=" + releaseTime + ", createTime="
+				+ createTime + "]";
+	}
+    
+}

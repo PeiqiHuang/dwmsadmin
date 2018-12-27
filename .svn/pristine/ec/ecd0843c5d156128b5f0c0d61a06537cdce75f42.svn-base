@@ -1,0 +1,430 @@
+package com.dwms.meeting.domain;
+
+import java.util.Date;
+
+import javax.persistence.*;
+
+@Table(name = "tb_meeting_info")
+public class Meeting {
+	
+	/**
+	 * 会议进行情况
+	 */
+	public static final int PROGRESS_NOT_BEGIN = 0;
+	public static final int PROGRESS_BEGIN = 1;
+	public static final int PROGRESS_END = 2;
+	
+	/**
+	 * 状态
+	 */
+	public static final int STATUS_DELETE = -9;
+	public static final int STATUS_CANCEL = -1;
+	public static final int STATUS_WAIT = 0;
+	public static final int STATUS_VALID = 1;
+    /**
+     * 会议ID
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer mtgId;
+
+    /**
+     * 党支部ID
+     */
+    private Integer partyId;
+
+    /**
+     * 主题
+     */
+    private String mtgName;
+
+    /**
+     * 议题
+     */
+    private String mtgTitle;
+
+    /**
+     * 会议要求
+     */
+    private String mtgDesc;
+
+    /**
+     * 地点
+     */
+    private String address;
+
+    /**
+     * 会议提醒 1是 0否
+     */
+    private Integer remind;
+
+    /**
+     * 会议签到 1是 0否
+     */
+    private Integer signIn;
+
+    /**
+     * 会议消息推送 1是 0否
+     */
+    private Integer pushMsg;
+
+    /**
+     * 记录人userId
+     */
+    private String recorder;
+
+    /**
+     * 签到负责人userId
+     */
+    private String signer;
+
+    /**
+     * 签到负责人代签或补签 1允许 0禁止
+     */
+    private Integer signHelp;
+
+    /**
+     * 状态 -9已删除 -1已取消 0待发布 1已发布
+     */
+    private Integer status;
+
+    /**
+     * 会议开始时间
+     */
+    private Date beginTime;
+
+    /**
+     * 会议结束时间
+     */
+    private Date endTime;
+
+    /**
+     * 创建时间
+     */
+    private Date createTime;
+
+    // 用于搜索条件中的时间字段
+ 	@Transient
+ 	private String timeField;
+ 	
+ 	// 会议进行状态
+ 	@Transient
+ 	private Integer progress;
+ 	
+    /**
+     * 获取会议ID
+     *
+     * @return mtgId - 会议ID
+     */
+    public Integer getMtgId() {
+        return mtgId;
+    }
+
+    /**
+     * 设置会议ID
+     *
+     * @param mtgId 会议ID
+     */
+    public void setMtgId(Integer mtgId) {
+        this.mtgId = mtgId;
+    }
+
+    /**
+     * 获取党支部ID
+     *
+     * @return partyId - 党支部ID
+     */
+    public Integer getPartyId() {
+        return partyId;
+    }
+
+    /**
+     * 设置党支部ID
+     *
+     * @param partyId 党支部ID
+     */
+    public void setPartyId(Integer partyId) {
+        this.partyId = partyId;
+    }
+
+    /**
+     * 获取主题
+     *
+     * @return mtgName - 主题
+     */
+    public String getMtgName() {
+        return mtgName;
+    }
+
+    /**
+     * 设置主题
+     *
+     * @param mtgName 主题
+     */
+    public void setMtgName(String mtgName) {
+        this.mtgName = mtgName == null ? null : mtgName.trim();
+    }
+
+    /**
+     * 获取议题
+     *
+     * @return mtgTitle - 议题
+     */
+    public String getMtgTitle() {
+        return mtgTitle;
+    }
+
+    /**
+     * 设置议题
+     *
+     * @param mtgTitle 议题
+     */
+    public void setMtgTitle(String mtgTitle) {
+        this.mtgTitle = mtgTitle == null ? null : mtgTitle.trim();
+    }
+
+    /**
+     * 获取会议要求
+     *
+     * @return mtgDesc - 会议要求
+     */
+    public String getMtgDesc() {
+        return mtgDesc;
+    }
+
+    /**
+     * 设置会议要求
+     *
+     * @param mtgDesc 会议要求
+     */
+    public void setMtgDesc(String mtgDesc) {
+        this.mtgDesc = mtgDesc == null ? null : mtgDesc.trim();
+    }
+
+    /**
+     * 获取地点
+     *
+     * @return address - 地点
+     */
+    public String getAddress() {
+        return address;
+    }
+
+    /**
+     * 设置地点
+     *
+     * @param address 地点
+     */
+    public void setAddress(String address) {
+        this.address = address == null ? null : address.trim();
+    }
+
+    /**
+     * 获取会议提醒 1是 0否
+     *
+     * @return remind - 会议提醒 1是 0否
+     */
+    public Integer getRemind() {
+        return remind;
+    }
+
+    /**
+     * 设置会议提醒 1是 0否
+     *
+     * @param remind 会议提醒 1是 0否
+     */
+    public void setRemind(Integer remind) {
+        this.remind = remind;
+    }
+
+    /**
+     * 获取会议签到 1是 0否
+     *
+     * @return signIn - 会议签到 1是 0否
+     */
+    public Integer getSignIn() {
+        return signIn;
+    }
+
+    /**
+     * 设置会议签到 1是 0否
+     *
+     * @param signIn 会议签到 1是 0否
+     */
+    public void setSignIn(Integer signIn) {
+        this.signIn = signIn;
+    }
+
+    /**
+     * 获取会议消息推送 1是 0否
+     *
+     * @return pushMsg - 会议消息推送 1是 0否
+     */
+    public Integer getPushMsg() {
+        return pushMsg;
+    }
+
+    /**
+     * 设置会议消息推送 1是 0否
+     *
+     * @param pushMsg 会议消息推送 1是 0否
+     */
+    public void setPushMsg(Integer pushMsg) {
+        this.pushMsg = pushMsg;
+    }
+
+    /**
+     * 获取记录人userId
+     *
+     * @return recorder - 记录人userId
+     */
+    public String getRecorder() {
+        return recorder;
+    }
+
+    /**
+     * 设置记录人userId
+     *
+     * @param recorder 记录人userId
+     */
+    public void setRecorder(String recorder) {
+        this.recorder = recorder;
+    }
+
+    /**
+     * 获取签到负责人userId
+     *
+     * @return signer - 签到负责人userId
+     */
+    public String getSigner() {
+        return signer;
+    }
+
+    /**
+     * 设置签到负责人userId
+     *
+     * @param signer 签到负责人userId
+     */
+    public void setSigner(String signer) {
+        this.signer = signer;
+    }
+
+    /**
+     * 获取签到负责人代签或补签 1允许 0禁止
+     *
+     * @return signHelp - 签到负责人代签或补签 1允许 0禁止
+     */
+    public Integer getSignHelp() {
+        return signHelp;
+    }
+
+    /**
+     * 设置签到负责人代签或补签 1允许 0禁止
+     *
+     * @param signHelp 签到负责人代签或补签 1允许 0禁止
+     */
+    public void setSignHelp(Integer signHelp) {
+        this.signHelp = signHelp;
+    }
+
+    /**
+     * 获取状态 -9已删除 -1已取消 0待发布 1已发布
+     *
+     * @return status - 状态 -9已删除 -1已取消 0待发布 1已发布
+     */
+    public Integer getStatus() {
+        return status;
+    }
+
+    /**
+     * 设置状态 -9已删除 -1已取消 0待发布 1已发布
+     *
+     * @param status 状态 -9已删除 -1已取消 0待发布 1已发布
+     */
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    /**
+     * 获取会议开始时间
+     *
+     * @return beginTime - 会议开始时间
+     */
+    public Date getBeginTime() {
+        return beginTime;
+    }
+
+    /**
+     * 设置会议开始时间
+     *
+     * @param beginTime 会议开始时间
+     */
+    public void setBeginTime(Date beginTime) {
+        this.beginTime = beginTime;
+    }
+
+    /**
+     * 获取会议结束时间
+     *
+     * @return endTime - 会议结束时间
+     */
+    public Date getEndTime() {
+        return endTime;
+    }
+
+    /**
+     * 设置会议结束时间
+     *
+     * @param endTime 会议结束时间
+     */
+    public void setEndTime(Date endTime) {
+        this.endTime = endTime;
+    }
+
+    /**
+     * 获取创建时间
+     *
+     * @return createTime - 创建时间
+     */
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    /**
+     * 设置创建时间
+     *
+     * @param createTime 创建时间
+     */
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+    
+    public String getTimeField() {
+		return timeField;
+	}
+
+	public void setTimeField(String timeField) {
+		this.timeField = timeField;
+	}
+
+	public Integer getProgress() {
+		return progress;
+	}
+
+	public void setProgress(Integer progress) {
+		this.progress = progress;
+	}
+
+	@Override
+	public String toString() {
+		return "Meeting [mtgId=" + mtgId + ", partyId=" + partyId
+				+ ", mtgName=" + mtgName + ", mtgTitle=" + mtgTitle
+				+ ", mtgDesc=" + mtgDesc + ", address=" + address + ", remind="
+				+ remind + ", signIn=" + signIn + ", pushMsg=" + pushMsg
+				+ ", recorder=" + recorder + ", signer=" + signer
+				+ ", signHelp=" + signHelp + ", status=" + status
+				+ ", beginTime=" + beginTime + ", endTime=" + endTime
+				+ ", createTime=" + createTime + ", progress=" + progress + "]";
+	}
+	
+}

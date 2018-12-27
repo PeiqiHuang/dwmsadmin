@@ -1,0 +1,26 @@
+package com.dwms.common.util.poi.convert;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.dwms.common.util.DateUtil;
+
+public class DateConvert implements ExportConvert {
+
+    private Logger log = LoggerFactory.getLogger(this.getClass());
+
+    @Override
+    public String handler(Object val) {
+        try {
+            if (val == null)
+                return "";
+            else {
+                return DateUtil.formatCSTTime(val.toString(), "yyyy-MM-dd");
+            }
+        } catch (Exception e) {
+            log.error("时间转换异常", e);
+            return "";
+        }
+    }
+
+}

@@ -1,0 +1,30 @@
+package com.dwms.user.service;
+
+import java.util.List;
+
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.dwms.common.domain.ResponseBo;
+import com.dwms.common.service.IService;
+import com.dwms.user.domain.User;
+
+@CacheConfig(cacheNames = "UserService")
+public interface UserService extends IService<User> {
+
+    User findById(String userId);
+    
+    User findByName(String userName);
+
+    List<User> findAllUsers(User user);
+
+    ResponseBo addUser(User user, MultipartFile file);
+
+    ResponseBo updateUser(User user, MultipartFile file);
+
+    ResponseBo batchUser(Integer partyId, MultipartFile batchFile);
+
+    User findByMobile(String mobile);
+
+    //void deleteUsers(String userIds);
+}

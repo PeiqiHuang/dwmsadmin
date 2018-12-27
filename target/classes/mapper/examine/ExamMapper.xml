@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dwms.examine.dao.ExamMapper">
+  <resultMap id="BaseResultMap" type="com.dwms.examine.domain.Exam">
+    <!--
+      WARNING - @mbg.generated
+    -->
+    <id column="examId" jdbcType="INTEGER" property="examId" />
+    <result column="partyId" jdbcType="INTEGER" property="partyId" />
+    <result column="examName" jdbcType="VARCHAR" property="examName" />
+    <result column="examDesc" jdbcType="VARCHAR" property="examDesc" />
+    <result column="totalScore" jdbcType="INTEGER" property="totalScore" />
+    <result column="passScore" jdbcType="INTEGER" property="passScore" />
+    <result column="quNum" jdbcType="INTEGER" property="quNum" />
+    <result column="timeLength" jdbcType="INTEGER" property="timeLength" />
+    <result column="showType" jdbcType="TINYINT" property="showType" />
+    <result column="pushMsg" jdbcType="TINYINT" property="pushMsg" />
+    <result column="endMsg" jdbcType="TINYINT" property="endMsg" />
+    <result column="previewer" jdbcType="VARCHAR" property="previewer" />
+    <result column="status" jdbcType="TINYINT" property="status" />
+    <result column="beginTime" jdbcType="TIMESTAMP" property="beginTime" />
+    <result column="endTime" jdbcType="TIMESTAMP" property="endTime" />
+    <result column="releaseTime" jdbcType="TIMESTAMP" property="releaseTime" />
+    <result column="createTime" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+  
+  <select id="findById" resultType="examWithUser">
+    select e.*, eu.userId from tb_examine_info e 
+    left join tb_examine_user eu on e.examId=eu.examId
+    where e.examId = #{examId}
+  </select>
+</mapper>

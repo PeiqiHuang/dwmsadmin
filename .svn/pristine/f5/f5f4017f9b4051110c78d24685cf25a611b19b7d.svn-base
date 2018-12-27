@@ -1,0 +1,30 @@
+function createUserSelect(idArr) {
+    $.post(ctx + "user/getUsers", {}, function (r) {
+        if (r.code === 0) {
+            var data = r.msg;
+            $.each(idArr, function(){
+            	var $select = $("select[name='"+this+"']");
+            	$.each(data, function(){
+            		$select.append("<option value='"+this.userId+"'>"+this.userName+"</option>");
+            	})
+            })
+        } else {
+            $MB.n_danger(r.msg);
+        }
+    })
+}
+
+function getRecorder() {
+	var ref = $('#recorderTree').jstree(true);
+	var ids = ref.get_checked();
+	$("[name='recorder']").val(ids[0]);
+}
+
+function refreshRecorderTree() {
+	$MB.refreshJsTree("recorderTree", createRecorderTree());
+}
+
+function recorderTreeSelect(id) {
+	var $recorderTree = $('#recorderTree');
+	$recorderTree.jstree('select_node', id, true);
+}

@@ -1,0 +1,80 @@
+var validator;
+var $entityAddForm = $("#entity-add-form");
+
+$(function () {
+    validateRule();
+    createPartyTree();
+    
+    $("#entity-add .btn-save").click(function () {
+    	var name = $(this).attr("name");
+        getParty();
+        validator = $entityAddForm.validate();
+        var flag = validator.form();
+        if (flag) {
+        	if (name === "save") {
+                $.post(ctx + "wishTpl/add", $entityAddForm.serialize(), function (r) {
+                    if (r.code === 0) {
+                        closeModal();
+                        refresh();
+                        $MB.n_success(r.msg);
+                    } else $MB.n_danger(r.msg);
+                });        		
+        	}
+        	if (name === "update") {
+        		$.post(ctx + "wishTpl/update", $entityAddForm.serialize(), function (r) {
+        			if (r.code === 0) {
+        				closeModal();
+        				refresh();
+        				$MB.n_success(r.msg);
+        			} else $MB.n_danger(r.msg);
+        		});        		
+        	}
+        }
+    });
+
+    $("#entity-add .btn-close").click(function () {
+        closeModal();
+    });
+
+});
+
+function closeModal() {
+	$("#entity-add-button").attr("name", "save");
+	setStatus(1);
+    $("#entity-add-modal-title").html('新增模板');
+    $("#entity-add-button").prop("hidden", false);
+    $("textarea[name='wishText']").text("");
+    validator.resetForm();
+    $MB.closeAndRestModal("entity-add");
+    refreshPartyTree();
+}
+
+function validateRule() {
+    var icon = "<i class='zmdi zmdi-close-circle zmdi-hc-fw'></i> ";
+    validator = $entityAddForm.validate({
+    	ignore: ".no-need",
+        rules: {
+        	wishText: {
+                required: true,
+                maxlength: 500
+            },
+            partyId: {
+            	required: true
+            }
+        },
+        errorPlacement: function (error, element) {
+        	if (element.is(":checkbox") || element.is(":radio")) {
+                error.appendTo(element.parent().parent());
+            } else {
+                error.insertAfter(element);
+            }
+        },
+        messages: {
+        	wishText: {
+                required: icon + "请输入模板内容",
+                maxlength: icon + "模板内容长度少于500个字符"
+            },
+        	partyId: icon + "请选择党支部"
+        }
+    });
+}

@@ -1,0 +1,270 @@
+<div class="modal fade" id="entity-add" data-keyboard="false" data-backdrop="static" ><!-- tabindex="-1" 去掉，否则日期控件不能选择年月下拉 -->
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title pull-left" id="entity-add-modal-title">新增党员</h3>
+            </div>
+            <div class="modal-body">
+                <form id="entity-add-form" enctype="multipart/form-data">
+                    <!-- 批量生产显示 -->
+                    <div class="row" id="batchAdd" hidden>
+                        <div class="col-sm-11">
+                            <div class="input-group">
+                                <span class="input-group-addon">
+                                                                                                                上传xls文件：
+                                </span>
+                                <div class="form-group">
+                                    <input name="batchFile" class="no-need" type="file" >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 普通新增显示 -->
+                    <div id="singleAdd">
+	                    <div class="row">
+	                        <div class="col-sm-11">
+	                            <div class="input-group">
+	                                <span class="input-group-addon">
+						               	 党员名称：
+						            </span>
+	                                <div class="form-group">
+	                                    <input type="text" name="userName" class="form-control">
+	                                    <input type="text" hidden name="userId" class="form-control">
+	                                </div>
+	                            </div>
+	                        </div>
+	                    </div>
+	                    <div class="row">
+	                        <div class="col-sm-11">
+	                            <div class="input-group">
+	                                <span class="input-group-addon">
+						               	 手机：
+						            </span>
+	                                <div class="form-group">
+	                                    <input type="text" name="mobile" class="form-control">
+	                                </div>
+	                            </div>
+	                        </div>
+	                    </div>
+	                    <div class="row">
+	                        <div class="col-sm-11">
+	                            <div class="input-group">
+	                                <span class="input-group-addon">
+						               	 头像：
+						            </span>
+	                                <div class="form-group">
+	                                	<img src="" class="img-responsive" style="max-height:200px;max-width:200px;" id="avatar">
+	                                </div>
+	                            </div>
+	                        </div>
+	                    </div>
+	                    <div class="row">
+	                        <div class="col-sm-11">
+	                            <div class="input-group">
+	                                <span class="input-group-addon">
+						               	 上传新头像：
+						            </span>
+	                                <div class="form-group">
+	                                    <input name="file" type="file" >
+	                                </div>
+	                            </div>
+	                        </div>
+	                    </div>
+	                    <div class="row">
+	                        <div class="col-sm-11">
+	                            <div class="input-group" style="margin-top:10px;">
+	                                <span class="input-group-addon">
+						               	性别：
+						             </span>
+	                                <div class="form-group">
+	                                    <label class="custom-control custom-radio">
+	                                        <input name="gender" type="radio" value="1" class="custom-control-input">
+	                                        <span class="custom-control-indicator"></span>
+	                                        <span class="custom-control-description">男</span>
+	                                    </label>
+	                                    <label class="custom-control custom-radio">
+	                                        <input name="gender" type="radio" value="2" class="custom-control-input">
+	                                        <span class="custom-control-indicator"></span>
+	                                        <span class="custom-control-description">女</span>
+	                                    </label>
+	                                    <label class="custom-control custom-radio">
+	                                        <input name="gender" type="radio" value="0" class="custom-control-input">
+	                                        <span class="custom-control-indicator"></span>
+	                                        <span class="custom-control-description">未知</span>
+	                                    </label>
+	                                </div>
+	                            </div>
+	                        </div>
+	                    </div>
+	                    <div class="row">
+	                        <div class="col-sm-11">
+	                            <div class="input-group">
+	                                <span class="input-group-addon">
+						               	党员类型：
+						             </span>
+						             <div class="form-group">
+	                                    <label class="custom-control custom-radio">
+	                                        <input name="partyType" type="radio" value="1" class="custom-control-input">
+	                                        <span class="custom-control-indicator"></span>
+	                                        <span class="custom-control-description">申请入党人</span>
+	                                    </label>
+	                                    <label class="custom-control custom-radio">
+	                                        <input name="partyType" type="radio" value="2" class="custom-control-input">
+	                                        <span class="custom-control-indicator"></span>
+	                                        <span class="custom-control-description">入党积极分子</span>
+	                                    </label>
+	                                    <label class="custom-control custom-radio">
+	                                        <input name="partyType" type="radio" value="3" class="custom-control-input">
+	                                        <span class="custom-control-indicator"></span>
+	                                        <span class="custom-control-description">发展对象</span>
+	                                    </label>
+	                                    <label class="custom-control custom-radio">
+	                                        <input name="partyType" type="radio" value="4" class="custom-control-input">
+	                                        <span class="custom-control-indicator"></span>
+	                                        <span class="custom-control-description">预备党员</span>
+	                                    </label>
+	                                    <label class="custom-control custom-radio">
+	                                        <input name="partyType" type="radio" value="5" class="custom-control-input">
+	                                        <span class="custom-control-indicator"></span>
+	                                        <span class="custom-control-description">正式党员</span>
+	                                    </label>
+	                                </div>
+	                                <!-- <div class="form-group">
+	                                    <select name="partyType"  multiple="multiple">
+	                                    	<option value="1">申请入党人</option>
+	                                        <option value="2">入党积极分子</option>
+	                                        <option value="3">发展对象</option>
+	                                        <option value="4">预备党员</option>
+	                                        <option value="5">正式党员</option>
+	                                    </select>
+	                                </div> -->
+	                            </div>
+	                        </div>
+	                    </div>
+	                    <div class="row">
+	                        <div class="col-sm-11">
+	                            <div class="input-group" style="margin-top:10px;">
+	                                <span class="input-group-addon">
+						               	工作状态：
+						             </span>
+	                                <div class="form-group">
+	                                    <label class="custom-control custom-radio">
+	                                        <input name="workStatus" type="radio" value="0" class="custom-control-input">
+	                                        <span class="custom-control-indicator"></span>
+	                                        <span class="custom-control-description">离职</span>
+	                                    </label>
+	                                    <label class="custom-control custom-radio">
+	                                        <input name="workStatus" type="radio" value="1" class="custom-control-input">
+	                                        <span class="custom-control-indicator"></span>
+	                                        <span class="custom-control-description">在岗</span>
+	                                    </label>
+	                                    <label class="custom-control custom-radio">
+	                                        <input name="workStatus" type="radio" value="2" class="custom-control-input">
+	                                        <span class="custom-control-indicator"></span>
+	                                        <span class="custom-control-description">在职</span>
+	                                    </label>
+	                                </div>
+	                            </div>
+	                        </div>
+	                    </div>
+	                    <div class="row">
+	                        <div class="col-sm-11">
+	                            <div class="input-group">
+	                                <span class="input-group-addon">
+						               	 党内职务：
+						            </span>
+	                                <!-- <div class="form-group">
+	                                    <input type="text" name="partyPosts" class="form-control">
+	                                </div> -->
+	                                <div class="form-group">
+	                                    <label class="custom-control custom-radio">
+	                                        <input name="partyPosts" type="radio" value="1" class="custom-control-input">
+	                                        <span class="custom-control-indicator"></span>
+	                                        <span class="custom-control-description">普通党员</span>
+	                                    </label>
+	                                    <label class="custom-control custom-radio">
+	                                        <input name="partyPosts" type="radio" value="2" class="custom-control-input">
+	                                        <span class="custom-control-indicator"></span>
+	                                        <span class="custom-control-description">支部委员</span>
+	                                    </label>
+	                                    <label class="custom-control custom-radio">
+	                                        <input name="partyPosts" type="radio" value="3" class="custom-control-input">
+	                                        <span class="custom-control-indicator"></span>
+	                                        <span class="custom-control-description">支部副书记</span>
+	                                    </label>
+	                                    <label class="custom-control custom-radio">
+	                                        <input name="partyPosts" type="radio" value="4" class="custom-control-input">
+	                                        <span class="custom-control-indicator"></span>
+	                                        <span class="custom-control-description">支部书记</span>
+	                                    </label>
+	                                </div>
+	                            </div>
+	                        </div>
+	                    </div>
+	                    <div class="row">
+	                        <div class="col-sm-11">
+	                            <div class="input-group">
+	                                <span class="input-group-addon">
+						               	 转为预备党员日期：
+						            </span>
+	                                <div class="form-group">
+	                                    <input type="text" name="probationaryTime" class="form-control">
+	                                </div>
+	                            </div>
+	                        </div>
+	                    </div>
+	                    <div class="row">
+	                        <div class="col-sm-11">
+	                            <div class="input-group">
+	                                <span class="input-group-addon">
+						               	转为正式党员日期：
+						            </span>
+	                                <div class="form-group">
+	                                    <input type="text" name="fullTime" class="form-control">
+	                                </div>
+	                            </div>
+	                        </div>
+	                    </div>
+	                    <div class="row">
+	                        <div class="col-sm-11">
+	                            <div class="input-group" style="margin-top:10px;">
+	                                <span class="input-group-addon">
+						               	状态：
+						             </span>
+	                                <div class="toggle-switch">
+	                                    <input type="checkbox" id="statusCheck" checked class="toggle-switch__checkbox">
+	                                    <input type="text" name="status" hidden class="form-control" value="1">
+	                                    <i class="toggle-switch__helper"></i>
+	                                </div>
+	                                <span class="input-group-addon" id="statusLabel" style="margin-left: 10px;">
+		                                 	正常
+							             </span>
+	                            </div>
+	                        </div>
+	                    </div>
+                    </div>
+                    <div id="party" class="row"  th:if="${isAdmin}">
+                        <div class="col-sm-11">
+                            <div class="input-group">
+                                <span class="input-group-addon" style="justify-content: flex-start;margin-top: .5rem;">
+					               	党支部：
+					             </span>
+                                <div class="form-group">
+                                    <div id="partyTree"></div>
+                                </div>
+                                <input type="hidden" name="partyId">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-save" id="entity-add-button" name="save">保存</button>
+                <button type="button" class="btn btn-secondary btn-close">关闭</button>
+                <button class="btn-hide"></button>
+            </div>
+        </div>
+    </div>
+</div>
+<script data-th-src="@{js/app/common/party.js}"></script>
+<script data-th-src="@{js/app/user/userAdd.js}"></script>

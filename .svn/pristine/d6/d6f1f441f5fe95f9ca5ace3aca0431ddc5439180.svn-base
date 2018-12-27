@@ -1,0 +1,293 @@
+package com.dwms.due.domain;
+
+import java.util.Date;
+
+import javax.persistence.*;
+
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+@Table(name = "tb_due_info")
+@ToString
+public class Due {
+    /**
+     * 状态
+     */
+    public static final int STATUS_DELETE = -9;
+    public static final int STATUS_CANCEL = -1;
+    public static final int STATUS_WAIT = 0;
+    public static final int STATUS_VALID = 1;
+    
+    /**
+     * 缴费项目
+     */
+    public static final int ITEM_NORMAL = 1;
+    public static final int ITEM_SPECIAL = 2;
+    
+    /**
+     * 缴费类型
+     */
+    public static final int TYPE_FIX = 1;
+    public static final int TYPE_SPECIAL = 2;
+    
+    /**
+     * 缴费ID
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer dueId;
+
+    /**
+     * 党支部id
+     */
+    private Integer partyId;
+
+    /**
+     * 缴费标题
+     */
+    private String title;
+
+    /**
+     * 缴费描述
+     */
+    private String dueDesc;
+
+    /**
+     * 缴费项目 1党费 2特殊党费
+     */
+    private Integer dueItem;
+
+    /**
+     * 1固定金额 2自由金额
+     */
+    private Integer dueType;
+
+    /**
+     * 缴费金额
+     */
+    private Integer due;
+
+    /**
+     * 状态 -9已删除 -1已取消 0待发布 1已发布
+     */
+    private Integer status;
+
+    /**
+     * 截止日期
+     */
+    private Date endTime;
+
+    /**
+     * 发布时间
+     */
+    private Date releaseTime;
+
+    /**
+     * 创建时间
+     */
+    private Date createTime;
+    
+    // 用于搜索条件中的时间字段
+    @Transient
+    @Getter
+    @Setter
+    private String timeField;
+    /**
+     * 获取缴费ID
+     *
+     * @return dueId - 缴费ID
+     */
+    public Integer getDueId() {
+        return dueId;
+    }
+
+    /**
+     * 设置缴费ID
+     *
+     * @param dueId 缴费ID
+     */
+    public void setDueId(Integer dueId) {
+        this.dueId = dueId;
+    }
+
+    /**
+     * 获取党支部id
+     *
+     * @return partyId - 党支部id
+     */
+    public Integer getPartyId() {
+        return partyId;
+    }
+
+    /**
+     * 设置党支部id
+     *
+     * @param partyId 党支部id
+     */
+    public void setPartyId(Integer partyId) {
+        this.partyId = partyId;
+    }
+
+    /**
+     * 获取缴费标题
+     *
+     * @return title - 缴费标题
+     */
+    public String getTitle() {
+        return title;
+    }
+
+    /**
+     * 设置缴费标题
+     *
+     * @param title 缴费标题
+     */
+    public void setTitle(String title) {
+        this.title = title == null ? null : title.trim();
+    }
+
+    /**
+     * 获取缴费描述
+     *
+     * @return dueDesc - 缴费描述
+     */
+    public String getDueDesc() {
+        return dueDesc;
+    }
+
+    /**
+     * 设置缴费描述
+     *
+     * @param dueDesc 缴费描述
+     */
+    public void setDueDesc(String dueDesc) {
+        this.dueDesc = dueDesc == null ? null : dueDesc.trim();
+    }
+
+    /**
+     * 获取缴费项目 1党费 2特殊党费
+     *
+     * @return dueItem - 缴费项目 1党费 2特殊党费
+     */
+    public Integer getDueItem() {
+        return dueItem;
+    }
+
+    /**
+     * 设置缴费项目 1党费 2特殊党费
+     *
+     * @param dueItem 缴费项目 1党费 2特殊党费
+     */
+    public void setDueItem(Integer dueItem) {
+        this.dueItem = dueItem;
+    }
+
+    /**
+     * 获取1固定金额 2自由金额
+     *
+     * @return dueType - 1固定金额 2自由金额
+     */
+    public Integer getDueType() {
+        return dueType;
+    }
+
+    /**
+     * 设置1固定金额 2自由金额
+     *
+     * @param dueType 1固定金额 2自由金额
+     */
+    public void setDueType(Integer dueType) {
+        this.dueType = dueType;
+    }
+
+    /**
+     * 获取缴费金额
+     *
+     * @return due - 缴费金额
+     */
+    public Integer getDue() {
+        return due;
+    }
+
+    /**
+     * 设置缴费金额
+     *
+     * @param due 缴费金额
+     */
+    public void setDue(Integer due) {
+        this.due = due;
+    }
+
+    /**
+     * 获取状态 -9已删除 -1已取消 0待发布 1已发布
+     *
+     * @return status - 状态 -9已删除 -1已取消 0待发布 1已发布
+     */
+    public Integer getStatus() {
+        return status;
+    }
+
+    /**
+     * 设置状态 -9已删除 -1已取消 0待发布 1已发布
+     *
+     * @param status 状态 -9已删除 -1已取消 0待发布 1已发布
+     */
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    /**
+     * 获取截止日期
+     *
+     * @return endTime - 截止日期
+     */
+    public Date getEndTime() {
+        return endTime;
+    }
+
+    /**
+     * 设置截止日期
+     *
+     * @param endTime 截止日期
+     */
+    public void setEndTime(Date endTime) {
+        this.endTime = endTime;
+    }
+
+    /**
+     * 获取发布时间
+     *
+     * @return releaseTime - 发布时间
+     */
+    public Date getReleaseTime() {
+        return releaseTime;
+    }
+
+    /**
+     * 设置发布时间
+     *
+     * @param releaseTime 发布时间
+     */
+    public void setReleaseTime(Date releaseTime) {
+        this.releaseTime = releaseTime;
+    }
+
+    /**
+     * 获取创建时间
+     *
+     * @return createTime - 创建时间
+     */
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    /**
+     * 设置创建时间
+     *
+     * @param createTime 创建时间
+     */
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+}

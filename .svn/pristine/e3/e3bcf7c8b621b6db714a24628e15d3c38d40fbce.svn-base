@@ -1,0 +1,91 @@
+var validator;
+var $entityAddForm = $("#entity-add-form");
+$(function () {
+	//加载试卷
+	//initExamQu();
+	
+    validateRule();
+    
+    $("#entity-add .btn-save").click(function () {
+    	
+        validator = $entityAddForm.validate();
+        var flag = validator.form();
+        if (flag) {
+    		$.post(ctx + "examQu/update", $entityAddForm.serialize(), function (r) {
+    			if (r.code === 0) {
+    				closeModal();
+    				refresh();
+    				$MB.n_success(r.msg);
+    			} else $MB.n_danger(r.msg);
+    		});
+        }
+    });
+
+    $("#entity-add .btn-close").click(function () {
+        closeModal();
+    });
+
+});
+
+function initExamQu() {
+	var examId = $entityAddForm.find("input[name='examId']").val();
+	$.get(ctx + "examQu/getExamQuList", {examId : examId}, function(r) {
+		if (r.code == 0) {
+			var data = r.msg;
+			console.info(data)
+			$.each(data, function() {
+				
+			})
+		}
+	})
+}
+
+function closeModal() {
+    
+    validator.resetForm();
+    $MB.closeAndRestModal("entity-add");
+    
+}
+
+function validateRule() {
+    var icon = "<i class='zmdi zmdi-close-circle zmdi-hc-fw'></i> ";
+    validator = $entityAddForm.validate({
+        rules: {
+        	quId: {
+                required: true
+            },
+            score: {
+            	required: true,
+            	digits: true,
+            	min: 1
+            },
+            quNo: {
+            	required: true,
+            	digits: true,
+            	min: 1
+            }
+        },
+        errorPlacement: function (error, element) {
+            if (element.is(":checkbox") || element.is(":radio")) {
+                error.appendTo(element.parent().parent());
+            } else {
+                error.insertAfter(element);
+            }
+        },
+        messages: {
+        	quId: {
+                required: icon + "请搜索并选择试题"
+            },
+            score: {
+            	required: icon + "请输入试题分数",
+            	digits: icon + "请输入整数",
+            	min: icon + "请输入大于0的整数"
+            },
+            quNo: {
+            	required: icon + "请输入试题序号",
+            	digits: icon + "请输入整数",
+            	min: icon + "请输入大于0的整数"
+            }
+        }
+    });
+}

@@ -1,0 +1,109 @@
+<div class="card">
+    <div data-th-include="birthday/wishAdd"></div>
+    <div class="card-block">
+        <div class="table-responsive">
+            <div id="data-table_wrapper" class="dataTables_wrapper">
+                <div class="dataTables_buttons hidden-sm-down actions">
+                    <span class="actions__item zmdi zmdi-search" onclick="search()" title="搜索" /> <span class="actions__item zmdi zmdi-refresh-alt" onclick="refresh()" title="刷新" />
+                    <div class="dropdown actions__item">
+                        <i data-toggle="dropdown" class="zmdi zmdi-download"> </i>
+                        <ul class="dropdown-menu dropdown-menu-right">
+                            <a href="javascript:void(0)" class="dropdown-item" data-table-action="excel" onclick="exportEntityExcel()">
+							Excel (.xlsx) </a>
+                            <a href="javascript:void(0)" class="dropdown-item" data-table-action="csv" onclick="exportEntityCsv()"> CSV
+							(.csv) </a>
+                        </ul>
+                    </div>
+                    <span class="actions__item zmdi zmdi-favorite" onclick="openTpl()" title="祝福语模板" />
+                    <div class="dropdown actions__item" shiro:hasAnyPermissions="wish:add,wish:delete">
+                        <i data-toggle="dropdown" class="zmdi zmdi-more-vert"></i>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <a href="javascript:void(0)" class="dropdown-item" onclick="addEntity()" shiro:hasPermission="wish:add">新增祝福语</a>
+                            <a href="javascript:void(0)" class="dropdown-item" onclick="updateEntity()" shiro:hasPermission="wish:update">修改祝福语</a>
+                        </div>
+                    </div>
+                </div>
+                <div id="data-table_filter" class="dataTables_filter">
+                    <form class="entity-table-form">
+                        <div class="row">
+                        	<div class="col-sm-3">
+                                <div class="input-group">
+                                    <span class="input-group-addon">
+					               	创建时间：
+					            </span>
+                                    <div class="form-group">
+                                        <input type="text" name="timeField" class="form-control">
+                                        <i class="form-group__bar"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="input-group">
+                                    <span class="input-group-addon"> 生日党员： </span>
+                                    <div class="form-group">
+                                        <input type="text" name="toUserName" class="form-control"> <i class="form-group__bar"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="input-group">
+                                    <span class="input-group-addon"> 祝福人： </span>
+                                    <div class="form-group">
+                                        <input type="text" name="fromUserName" class="form-control"> <i class="form-group__bar"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="input-group">
+                                    <span class="input-group-addon"> 生日年分： </span>
+                                    <div class="form-group">
+                                        <input type="text" name="wishYear" class="form-control"> <i class="form-group__bar"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="input-group">
+                                    <span class="input-group-addon"> 祝福类型： </span>
+                                    <div class="form-group">
+                                        <select class="form-control" name="wishType">
+                                            <option value="" selected>所有</option>
+                                            <option value="1">书记寄语</option>
+                                            <option value="2">生日感言</option>
+                                            <option value="3">他人祝福</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="input-group">
+                                    <span class="input-group-addon"> 状态： </span>
+                                    <div class="form-group">
+                                        <select class="form-control" name="status">
+                                            <option value="" selected>所有</option>
+                                            <option value="1">启用</option>
+                                            <option value="0">屏蔽</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="party" class="col-sm-3" th:if="${isAdmin}">
+                                <div class="input-group">
+                                    <span class="input-group-addon"> 党支部： </span>
+                                    <div class="form-group">
+                                        <select class="form-control" name="partyId">
+                                            <option value="" selected>所有</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <table id="entityTable" data-mobile-responsive="true" class="mb-bootstrap-table text-nowrap"></table>
+            </div>
+        </div>
+    </div>
+</div>
+<script data-th-src="@{js/app/common/PartySelect.js}"></script>
+<script data-th-src="@{js/app/birthday/wish.js}"></script>
+<script data-th-src="@{js/app/birthday/wishEdit.js}"></script>

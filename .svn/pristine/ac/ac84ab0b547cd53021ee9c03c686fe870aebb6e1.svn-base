@@ -1,0 +1,96 @@
+var sortable = null;
+$(function() {
+	init();
+	
+	//瀑布流 排序冲突
+	//$('.masonry').imagesLoaded(function() {
+		/*$('.masonry').masonry({
+			// options
+			itemSelector: '.masonry-item',
+			columnWidth: 350
+		});*/
+	//});
+	
+	$(document).on("click", "img", function() {
+		if ($(this).hasClass("img-selected")) {
+			$(this).removeClass("img-selected")
+		} else {
+			$(this).addClass("img-selected")
+		}
+	})
+});
+
+function deleteImg() {
+	var ids = [];
+	$("img.img-selected").each(function(){
+		ids.push($(this).data("id"));
+	})
+	if (ids.length <= 0) {
+		$MB.n_danger("请选择要删除的图片！");
+		return;
+	}
+		
+	$MB.confirm({
+        text: "确定删除选中的图片？",
+        confirmButtonText: "删除"
+    }, function() {
+        $.post(ctx + 'albumImg/delete', { "ids": ids.join(",") }, function(r) {
+            if (r.code === 0) {
+                $MB.n_success(r.msg);
+                refresh();
+            } else {
+                $MB.n_danger(r.msg);
+            }
+        });
+    });
+}
+
+function init() {
+	var $copy = $("#imgTpl").clone().removeAttr("id").prop("hidden", false);
+	$.post(ctx + 'albumImg/list', {albumId: $("#albumId").val() }, function(r) {
+		if(null != sortable)  {
+			sortable.destroy();
+			sortable = null;
+		}
+        if (r.code === 0) {
+        	$("#imgTpl").siblings().remove();
+            $.each(r.msg, function(){
+            	$item = $copy.clone();
+            	$item.find("img").data("id", this.aiId).attr("src", this.imgPath);
+            	$item.appendTo("#sortable");
+            })
+          //拖拽排序
+        	var el = document.getElementById('sortable');
+        	sortable = Sortable.create(el, {
+        		animation: 150,
+        		onUpdate: function (evt){
+        	    	//var item = evt.item; // the current dragged HTMLElement
+        			$img = $("#sortable img:visible");
+        			/*console.info("img length: " + $img.length)
+        			var from = $img.eq(evt.oldIndex).data("id");
+        			console.info(evt.oldIndex)
+        			console.info(from)
+        			console.info(evt.newIndex)
+        			console.info(to)*/
+        			var aiNo = evt.newIndex;
+        			var aiId = $img.eq(aiNo-1).data("id");
+        	    	$.post(
+            			ctx + "albumImg/move", 
+            			{aiNo: aiNo, aiId: aiId, albumId: $("#albumId").val()}, 
+            			function(r) {
+        					if (r.code === 0) {
+        		                $MB.n_success(r.msg);
+        		                refresh();
+        		            } else {
+        		                $MB.n_danger(r.msg);
+        		            }
+            			}	
+        	    	)
+        		}
+        	});
+        } else {
+            $MB.n_danger(r.msg);
+        }
+    });
+	
+}
